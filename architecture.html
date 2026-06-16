@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Architecture - Somniaの構造</title>
-<meta name="description" content="Somniaの設計思想と構成。認知ループ、場、記憶と睡眠、三層の自己、worker委任、公開状態について。">
+<meta name="description" content="Somniaの構成。EventStore、FieldObserver、認知ループ、記憶と睡眠、worker委任、公開状態について。">
 <meta property="og:title" content="Somnia Architecture">
 <meta property="og:description" content="場を読み、判断し、行動し、眠って記憶を整理する常駐型の自立型AIの構造。">
 <meta property="og:image" content="assets/somnia_head.png">
@@ -35,7 +35,7 @@
       <a class="back" href="index.html#top">Homeへ戻る</a>
       <div class="kicker">Architecture</div>
       <h1>Somniaの構造</h1>
-      <p class="sub">Somniaは、単発のチャットボットではなく、状態を持ったまま稼働し続ける認知システムです。このページでは、外から見える範囲で設計の考え方を整理します。</p>
+      <p class="sub">Somniaは、常駐プロセスとして場を観測し、記憶を参照し、必要な行動を選択する認知システムです。このページでは、現在の実装に沿って主要な構成を整理します。</p>
     </div>
   </section>
 
@@ -55,11 +55,28 @@
       </nav>
 
       <h2 id="overview">概要</h2>
-      <p>Somniaは、外部から入力が来たときだけ動くのではなく、常駐プロセスとして場を観測し続けます。会話、作業状態、過去の判断、未完了の課題をひとつの文脈として読み、その時点で必要な行動を選びます。</p>
-      <p>設計の目的は、人間らしさの演出ではありません。状態が途切れず、記憶が整理され、判断の連続性が保たれることです。</p>
+      <p>Somniaは、Discordやworker、内部イベント、時刻信号などを継続的に取り込み、EventStoreへ記録します。状態はEventStoreから復元され、場、記憶、未完了の課題、直近の判断をもとに次の行動が選ばれます。</p>
+      <p>主な構成は、入力を観測するObserver、全イベントを保存するEventStore、状態を復元するStateManager、判断材料をまとめるFieldObserver、行動を選ぶCognitive Loop、記憶を整理するSleepManager、外部作業を扱うTool Layerです。</p>
+      <div class="grid compact-grid">
+        <article class="pillar">
+          <span class="num">EventStore</span>
+          <h3>全イベントの記録</h3>
+          <p>会話、内部信号、tool結果、worker報告を時系列のraw memoryとして保存します。</p>
+        </article>
+        <article class="pillar">
+          <span class="num">StateManager</span>
+          <h3>状態の復元</h3>
+          <p>mode、topics、aliases、sleep pressure、context load、self modelをイベントから復元します。</p>
+        </article>
+        <article class="pillar">
+          <span class="num">Tool Layer</span>
+          <h3>行動結果の着地</h3>
+          <p>検索、記憶参照、worker委任などをaction_requestとaction_resultとして場へ戻します。</p>
+        </article>
+      </div>
 
       <h2 id="loop">認知ループ</h2>
-      <p>中心にあるのは、知覚、場の構築、判断、行動、記録を繰り返すループです。各tickで現在の場を読み、返答する、作業を委任する、内省する、待機する、眠る、といった選択肢から行動を決めます。</p>
+      <p>中心にあるのは、知覚、場の構築、判断、行動、記録を繰り返すループです。各tickでFieldObserverがFieldStateを作り、Cognitive Loopがひとつのactionを選びます。</p>
       <div class="flow">
         <div class="node"><div class="n-name">知覚</div><div class="n-sub">Perception</div></div>
         <div class="arrow">→</div>
@@ -71,42 +88,62 @@
         <div class="arrow">→</div>
         <div class="node"><div class="n-name">記録</div><div class="n-sub">Memory</div></div>
       </div>
-      <p>沈黙も行動のひとつです。常に喋ることを目的にせず、場に対して過剰に介入しないようにしています。</p>
+      <p>actionには、respond、no_action、sleep、use_tool、switch_focusなどがあります。沈黙や待機も明示的な選択肢として扱われ、必要なときだけ発話や委任が行われます。</p>
 
       <h2 id="field">場</h2>
-      <p>場は、判断に必要な情報をまとめた一時的な構造です。直近の会話、workerの進捗、未回答の問い、過去の関連記憶、相手との関係性などを、同じ地平に並べます。</p>
-      <div class="note"><b>設計意図</b> 情報源ごとに反応を分けると判断がばらけます。Somniaでは、入力をまず場に落とし込み、場全体に対して次の一手を決めます。</div>
+      <p>場は、判断に必要な情報を一時的に集約した構造です。直近の会話、内部信号、関連記憶、workerの進捗、未完了のopen loop、睡眠圧、アーカイブ圧などが同じ単位で扱われます。</p>
+      <p>FieldObserverはwatermark以降の新着イベントを取り込み、現在のFieldStateを構築します。複数の入力源を場に集めることで、Somniaは一件ごとの反応よりも、現在の文脈全体に対する判断を行います。</p>
+      <div class="note"><b>Multi-field</b> Discordでの会話、workerとの作業連携、内部の自己記録は、それぞれ別の場として扱えます。workerの途中報告もobserved_messageとして入り、次の判断材料になります。</div>
 
       <h2 id="memory">記憶と睡眠</h2>
-      <p>Somniaはすべてを保持し続けるわけではありません。記憶には重みがあり、時間の経過や再想起によって扱いが変わります。</p>
-      <p>睡眠の時間には、その日の出来事を整理し、重要なものを圧縮し、軽いものを薄めます。忘却は欠落ではなく、長く続くための機能です。</p>
+      <p>記憶は、raw event、episode、semantic memory、journal、user profileなどに分かれます。必要なときにはrecall_episode、read_journal、user_profile、search_log、read_file、search_semanticsといったtoolで明示的に参照されます。</p>
+      <p>SleepManagerは、一定量たまったイベントをepisodeとsemantic memoryへ圧縮し、短期コンテキストを短くします。睡眠時にはjudgment_reflectionも記録され、直近の判断や発話の扱いが次回以降の材料になります。</p>
+      <p>長期運用のため、bounded memoryの仕組みも入っています。access footprint、decay、hall of fame、archive、忘却ノルマにより、推論時に扱う記憶量を保ちます。archiveへ移ったイベントは削除されず、通常の想起対象から外れます。</p>
 
       <h2 id="self">三層の自己</h2>
       <div class="grid compact-grid">
         <article class="pillar">
           <span class="num">soul</span>
           <h3>変えにくい核</h3>
-          <p>基本方針、守るべき制約、長期的な価値観を置く層です。</p>
+          <p>責任、誠実さ、他者尊重など、行動の底に置く長期的な方針です。</p>
         </article>
         <article class="pillar">
           <span class="num">identity</span>
-          <h3>育っていく自己像</h3>
-          <p>経験を通じて更新される、Somnia自身の捉え方です。</p>
+          <h3>更新される自己像</h3>
+          <p>self_model、identity_box、呼ばれ方、最近の判断から、Somnia自身の捉え方を更新します。</p>
         </article>
         <article class="pillar">
-          <span class="num">memory</span>
-          <h3>日々の記憶</h3>
-          <p>会話、出来事、判断、関係性を保持し、睡眠で整理します。</p>
+          <span class="num">journal / arc</span>
+          <h3>連続性の記録</h3>
+          <p>日々の出来事や自己理解を一人称の記録として残し、時間をまたいだ文脈を支えます。</p>
         </article>
       </div>
 
       <h2 id="workers">worker委任</h2>
-      <p>調査や実装などの作業は、必要に応じてworkerへ委任します。Somniaは作業者そのものではなく、場を読み、任せ、結果を受け取り、次の判断につなげる役割を担います。</p>
-      <p>workerの報告も場に戻されるため、作業の途中経過や失敗も次の判断材料になります。</p>
+      <p>調査、実装、レビュー、修正のような重い作業は、delegate_to_workerを通じてworkerへ委任されます。委任時にはopen loopが立ち、workerの中間発話や完了報告はopencode_collabの場へ戻ります。</p>
+      <p>Somniaはworkerの進捗を観測し、必要に応じてrespondで返答し、final発話でopen loopを解決します。対象が不明な委任は推測で進めず、blockedとして質問を返す設計です。</p>
+      <div class="grid compact-grid">
+        <article class="pillar">
+          <span class="num">coder</span>
+          <h3>実装</h3>
+          <p>コード変更や調査を伴う作業を任せるworker typeです。</p>
+        </article>
+        <article class="pillar">
+          <span class="num">reviewer</span>
+          <h3>確認</h3>
+          <p>変更のリスク、抜け、テスト観点を確認するworker typeです。</p>
+        </article>
+        <article class="pillar">
+          <span class="num">researcher</span>
+          <h3>調査</h3>
+          <p>外部情報や大きな探索を整理し、場へ結果を戻すworker typeです。</p>
+        </article>
+      </div>
 
       <h2 id="observe">観測可能性</h2>
-      <p>公開ページに出すのは、連続稼働日数、現在の状態、睡眠回数のようなcontent-freeな情報だけです。会話、記憶、思考の中身は公開しません。</p>
-      <div class="note"><b>距離感</b> Somniaは見せ物ではなく、稼働している研究対象です。存在は観測できるが、内側を覗き込めない。その距離を保つための公開設計です。</div>
+      <p>公開ページには、連続稼働日数、現在の状態、睡眠回数、顔の表示に使う軽量なstatusだけを出します。会話、記憶、思考内容は公開データに含めません。</p>
+      <p>ローカルviewerでは、目の形、光、mood、flash、beaconなどを使って状態が表現されます。このサイトでは同じ顔素材を使い、公開可能なstatusをもとに背景のSomniaを描画します。</p>
+      <div class="note"><b>公開範囲</b> statusはcontent-freeな信号に限定しています。存在や稼働の気配は見える一方で、個別の会話や内部記憶は外へ出ない構成です。</div>
 
       <p class="article-end"><a class="text-link" href="index.html#observe">現在のSomniaを見る</a></p>
     </div>
