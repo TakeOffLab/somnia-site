@@ -1,0 +1,16 @@
+{
+  "days_alive": 145,
+  "inception": "2026-05-18",
+  "now_doing": "静かに待機している",
+  "face": {
+    "primary": "idle",
+    "energy": "normal",
+    "mood": "calm",
+    "effects": [],
+    "beacon": false
+  },
+  "sleep_cycles": 565,
+  "memory_items": 4063,
+  "thoughts": 52333,
+  "generated_at": "2026-10-10T18:35:53+00:00"
+}
