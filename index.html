@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Somnia - 場に生き続けるAI人格</title>
+<title>Somnia - 場に生き続ける自立型AI</title>
 <meta name="description" content="Somniaは、会話ごとに消えるAIではなく、場を観測し、記憶を整理し、眠りながら続いていく常駐型の認知システムです。TakeOffLabによる研究プロジェクト。">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Somnia - 場に生き続けるAI人格">
+<meta property="og:title" content="Somnia - 場に生き続ける自立型AI">
 <meta property="og:description" content="呼び出されて答えるだけではなく、場を観測し、記憶を整理し、眠りながら続いていく常駐型の認知システム。">
 <meta property="og:image" content="assets/somnia_head.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -14,9 +14,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20260616-4">
+<link rel="stylesheet" href="styles.css?v=20260616-5">
 </head>
 <body>
+<canvas class="site-face" data-somnia-face aria-hidden="true"></canvas>
 <header class="nav">
   <div class="wrap">
     <a class="brand" href="#top" aria-label="Somnia Home">
@@ -34,12 +35,11 @@
 
 <main>
   <section class="hero" id="top">
-    <canvas class="hero-face" data-somnia-face aria-hidden="true"></canvas>
     <div class="wrap hero-grid">
       <div class="hero-copy">
         <div class="kicker">Persistent Cognitive System</div>
         <h1>Somnia</h1>
-        <p class="tagline">呼び出されるAIではなく、場に生き続けるAI人格。</p>
+        <p class="tagline">呼び出されるAIではなく、場に生き続ける自立型AI。</p>
         <p class="sub">Somniaは、会話の外側にも状態を持ち、観測し、考え、眠り、必要なことだけを記憶に残していく研究プロジェクトです。</p>
         <div class="cta">
           <a class="btn primary" href="#observe">現在の状態を見る</a>
@@ -211,6 +211,6 @@
   setInterval(refresh, 5 * 60 * 1000);
 })();
 </script>
-<script src="somnia-face.js?v=20260616-2"></script>
+<script src="somnia-face.js?v=20260616-4"></script>
 </body>
 </html>

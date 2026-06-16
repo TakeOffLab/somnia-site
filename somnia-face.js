@@ -160,6 +160,7 @@
       this.state = { primary: "idle", energy: "normal", mood: "calm", effects: [] };
       this.saccade = new SaccadePlanner();
       this.images = {};
+      this.eyeLayers = {};
       this.startedAt = performance.now();
       this.nextBlinkT = null;
       this.blinkUntilT = 0;
@@ -183,7 +184,46 @@
         img.onerror = reject;
         img.src = ASSET_BASE + file;
       })));
+      this.eyeLayers.leftEye = this.createEyeLayer(this.images.leftEye);
+      this.eyeLayers.rightEye = this.createEyeLayer(this.images.rightEye);
       this.resize();
+    }
+
+    createEyeLayer(img) {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      ctx.drawImage(img, 0, 0);
+      const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = frame.data;
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i] / 255;
+        const g = data[i + 1] / 255;
+        const b = data[i + 2] / 255;
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        const delta = max - min;
+        const s = max > 0 ? delta / max : 0;
+        const v = max;
+        let h = 0;
+        if (delta > 0) {
+          if (max === r) h = ((g - b) / delta) % 6;
+          else if (max === g) h = (b - r) / delta + 2;
+          else h = (r - g) / delta + 4;
+          h /= 6;
+          if (h < 0) h += 1;
+        }
+        const isCyan = h >= 0.46 && h <= 0.58 && s > 0.22 && v > 0.35;
+        const isPurple = h >= 0.68 && h <= 0.84 && s > 0.22 && v > 0.35;
+        if (isCyan || isPurple) {
+          data[i + 3] = Math.max(0, Math.min(255, 255 * s * v * 1.9));
+        } else {
+          data[i + 3] = 0;
+        }
+      }
+      ctx.putImageData(frame, 0, 0);
+      return canvas;
     }
 
     resize() {
@@ -356,10 +396,12 @@
     eyePlacement(key) {
       const w = this.canvas.width;
       const h = this.canvas.height;
-      const img = this.images[key];
+      const img = this.eyeLayers[key] || this.images[key];
       const isLeft = key === "leftEye";
       const targetW = w * 0.49;
-      const targetH = targetW * (img.naturalHeight / img.naturalWidth);
+      const sourceW = img.naturalWidth || img.width;
+      const sourceH = img.naturalHeight || img.height;
+      const targetH = targetW * (sourceH / sourceW);
       const cx = w * (isLeft ? 0.255 : 0.765);
       const cy = h * 0.59;
       return { x: cx - targetW / 2, y: cy - targetH / 2, w: targetW, h: targetH };
@@ -367,7 +409,7 @@
 
     drawEye(key, dx, dy, squash, scale, glow) {
       const ctx = this.ctx;
-      const img = this.images[key];
+      const img = this.eyeLayers[key] || this.images[key];
       const p = this.eyePlacement(key);
       const cx = p.x + p.w / 2 + dx;
       const cy = p.y + p.h / 2 + dy;
@@ -378,15 +420,15 @@
 
       ctx.save();
       ctx.globalCompositeOperation = "lighter";
-      ctx.filter = `blur(${Math.max(8, this.canvas.width * 0.012)}px) brightness(${Math.max(0.35, glow)})`;
-      ctx.globalAlpha = Math.max(0.12, Math.min(0.78, 0.34 + glow * 0.18));
+      ctx.filter = `blur(${Math.max(12, this.canvas.width * 0.018)}px) brightness(${Math.max(0.6, 1.1 + glow * 0.5)})`;
+      ctx.globalAlpha = Math.max(0.16, Math.min(0.92, 0.42 + glow * 0.26));
       ctx.drawImage(img, x, y, dw, dh);
       ctx.restore();
 
       ctx.save();
       this.applyMoodClip(ctx, key, x, y, dw, dh);
       ctx.globalAlpha = 0.94;
-      ctx.filter = `brightness(${Math.max(0.5, 0.95 + glow * 0.08)})`;
+      ctx.filter = `brightness(${Math.max(0.7, 1.02 + glow * 0.12)})`;
       ctx.drawImage(img, x, y, dw, dh);
       ctx.restore();
     }
