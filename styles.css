@@ -275,22 +275,29 @@ h3 {
   font-size: 14px;
 }
 
-.observe-section {
-  background:
-    linear-gradient(180deg, rgba(84,212,230,.06), transparent 34%),
-    rgba(18,23,34,.82);
-}
-.observe-head {
-  display: flex;
-  justify-content: space-between;
-  gap: 32px;
-  align-items: end;
-}
 .live {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
   margin-top: 30px;
+}
+.hero-live {
+  max-width: 720px;
+  margin-top: 26px;
+}
+.hero-live .stat {
+  padding: 16px;
+  background: rgba(13,16,23,.50);
+  backdrop-filter: blur(14px);
+}
+.hero-live .value {
+  font-size: 30px;
+}
+.hero-live .value.compact {
+  font-size: 18px;
+}
+.hero-live .hint {
+  font-size: 12px;
 }
 .stat {
   padding: 24px;
@@ -340,6 +347,17 @@ h3 {
   align-items: center;
 }
 .contact-actions { margin-top: 0; }
+.contact-grid { margin-top: 0; }
+.contact-note {
+  margin-top: 22px;
+}
+.contact-note p {
+  margin: 10px 0 0;
+  color: var(--muted);
+}
+.contact-note .contact-actions {
+  margin-top: 20px;
+}
 
 .page-hero {
   padding: 88px 0 54px;
@@ -492,6 +510,9 @@ footer .made {
   section { padding: 64px 0; }
   .grid, .live {
     grid-template-columns: 1fr;
+  }
+  .hero-live {
+    max-width: none;
   }
   .pillar { min-height: auto; }
   .contact-band {

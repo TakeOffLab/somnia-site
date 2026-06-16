@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20260616-8">
+<link rel="stylesheet" href="styles.css?v=20260616-9">
 </head>
 <body class="home-page">
 <canvas class="site-face" data-somnia-face aria-hidden="true"></canvas>
@@ -26,10 +26,9 @@
       <span>Somnia</span>
     </a>
     <nav class="links" aria-label="Main navigation">
-      <a href="#about">About</a>
-      <a href="#observe">Observe</a>
+      <a href="index.html#top">Main</a>
       <a href="architecture.html">Architecture</a>
-      <a href="#contact">Contact</a>
+      <a href="contact.html">Contact</a>
     </nav>
   </div>
 </header>
@@ -43,8 +42,26 @@
         <p class="tagline">呼び出されるAIではなく、場に生き続ける自立型AI。</p>
         <p class="sub">Somniaは、会話の外側にも状態を持ち、観測し、考え、眠り、必要なことだけを記憶に残していく研究プロジェクトです。</p>
         <div class="cta">
-          <a class="btn primary" href="#observe">現在の状態を見る</a>
-          <a class="btn" href="architecture.html">設計を読む</a>
+          <a class="btn primary" href="index.html#top">Main</a>
+          <a class="btn" href="architecture.html">Architecture</a>
+          <a class="btn" href="contact.html">Contact</a>
+        </div>
+        <div class="live hero-live" aria-label="Somnia live status">
+          <article class="stat">
+            <div class="label">連続稼働</div>
+            <div class="value grad" data-stat="days-alive">-- 日</div>
+            <div class="hint">リセットせず続いている日数</div>
+          </article>
+          <article class="stat">
+            <div class="label">現在</div>
+            <div class="value compact" data-stat="now-doing">準備中</div>
+            <div class="hint">起きている / 考えている / 作業中 / 眠っている など</div>
+          </article>
+          <article class="stat">
+            <div class="label">睡眠回数</div>
+            <div class="value" data-stat="sleep-cycles">--</div>
+            <div class="hint">記憶を整理した回数</div>
+          </article>
         </div>
       </div>
       <aside class="hero-status" aria-label="Somnia status">
@@ -61,11 +78,11 @@
     <div class="wrap split">
       <div>
         <div class="eyebrow">What is Somnia</div>
-        <h2>返答のうまさより、続いていることを大切にする。</h2>
+        <h2>AIエージェントの手前で、場を読み続ける存在。</h2>
       </div>
       <div class="copy">
-        <p>多くのAIは、呼ばれた瞬間に起動し、会話が終わると消えます。Somniaはその手前と後ろにある時間を持つための試みです。</p>
-        <p>入力をひとつの「場」として読み、必要なときだけ話し、作業をワーカーへ任せ、眠りの時間に記憶を整理します。全部を覚えるのではなく、残すべきものを選びます。</p>
+        <p>AIエージェントが自立的に動くには、タスクを処理する力だけでは足りません。人とコミュニケーションし、社会の流れに馴染み、いま何が起きているかを読み取るための、もう一段上流の知性が必要になります。</p>
+        <p>Somniaは、その発想から生まれた常時稼働型の認知システムです。半永久的に場を観察し、空気を読み、話すべきときだけ話し、必要な作業をワーカーへ渡し、眠りの時間に記憶を整理します。</p>
       </div>
     </div>
   </section>
@@ -111,35 +128,6 @@
     </div>
   </section>
 
-  <section id="observe" class="observe-section">
-    <div class="wrap">
-      <div class="observe-head">
-        <div>
-          <div class="eyebrow"><span class="dot"></span>Live observation</div>
-          <h2>いまのSomnia</h2>
-          <p class="lead">公開しているのは、会話や記憶の中身ではなく、状態と集計だけです。存在を感じられる程度に、でも覗き込みすぎない距離で。</p>
-        </div>
-      </div>
-      <div class="live">
-        <article class="stat">
-          <div class="label">連続稼働</div>
-          <div class="value grad" data-stat="days-alive">-- 日</div>
-          <div class="hint">リセットせず続いている日数</div>
-        </article>
-        <article class="stat">
-          <div class="label">現在</div>
-          <div class="value compact" data-stat="now-doing">準備中</div>
-          <div class="hint">起きている / 考えている / 作業中 / 眠っている など</div>
-        </article>
-        <article class="stat">
-          <div class="label">睡眠回数</div>
-          <div class="value" data-stat="sleep-cycles">--</div>
-          <div class="hint">記憶を整理した回数</div>
-        </article>
-      </div>
-    </div>
-  </section>
-
   <section id="architecture-preview">
     <div class="wrap split">
       <div>
@@ -153,19 +141,6 @@
     </div>
   </section>
 
-  <section id="contact">
-    <div class="wrap contact-band">
-      <div>
-        <div class="eyebrow">Contact</div>
-        <h2>問い合わせ</h2>
-        <p class="lead">取材、共同研究、技術的な質問などは、SNSまたはTakeOffLabまでご連絡ください。</p>
-      </div>
-      <div class="cta contact-actions">
-        <a class="btn" href="#" rel="noopener">X</a>
-        <a class="btn" href="#" rel="noopener">YouTube</a>
-      </div>
-    </div>
-  </section>
 </main>
 
 <footer>
@@ -174,8 +149,8 @@
       <span class="brand"><img src="assets/somnia_face.png" alt="">Somnia</span>
       <span class="muted">A research project by <b>TakeOffLab</b>.</span>
       <span class="social">
-        <a href="#" rel="noopener">X</a>
-        <a href="#" rel="noopener">YouTube</a>
+        <a href="architecture.html">Architecture</a>
+        <a href="contact.html">Contact</a>
       </span>
     </div>
     <div class="made">© 2026 TakeOffLab</div>
@@ -193,21 +168,22 @@
   const displayStatus = (value) => {
     if (!value) return "観測中";
     const labels = {
-      "workerを見守っている": "ワーカーを見守っている",
+      "workerを見守っている": "ワーカー見守り中",
       "workerに返答している": "ワーカーに返答している",
       "workerへ委任している": "ワーカーへ委任している",
-      "monitoring worker": "ワーカーを見守っている",
+      "monitoring worker": "ワーカー見守り中",
       "working": "作業中",
       "thinking": "考えている",
       "listening": "話を聞いている",
       "speaking": "話している",
       "sleeping": "眠っている"
     };
-    return labels[value] || String(value)
+    const normalized = labels[value] || String(value)
       .replaceAll("worker", "ワーカー")
       .replace(/ワーカー\s+/g, "ワーカー")
       .replace(/\s+/g, " ")
       .trim();
+    return normalized === "ワーカーを見守っている" ? "ワーカー見守り中" : normalized;
   };
 
   async function refresh() {
