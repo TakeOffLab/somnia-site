@@ -152,7 +152,7 @@
         <div class="hint">記憶を整理した回数</div>
       </div>
     </div>
-    <p class="live-note">※ ライブ観察は準備中です。公開する情報は「状態と集計」のみで、会話や記憶の中身は一切含みません。</p>
+    <p class="live-note">※ 公開しているのは「状態と集計」のみで、会話・記憶・思考の中身は一切含みません。約10分ごとに更新。</p>
   </div>
 </section>
 
@@ -173,17 +173,16 @@
 <!-- ライブ観察用フック (公開APIが整ったら data-stat を埋める。今は静かにフォールバック) -->
 <script>
 (async function () {
-  // 公開 read-only API のURL。整備後にここを設定する。
-  const API = ""; // e.g. "https://example.com/api/public"
-  if (!API) return;
+  // Somnia 自身が定期 push する content-free ステータス (status ブランチ)。
+  const API = "https://raw.githubusercontent.com/TakeOffLab/somnia-site/status/status.json";
   try {
     const r = await fetch(API, { cache: "no-store" });
     const d = await r.json();
-    const set = (k, v) => { const el = document.querySelector(`[data-stat="${k}"]`); if (el && v != null) el.textContent = v; };
+    const set = (k, v) => { const el = document.querySelector(`[data-stat="${k}"]`); if (el && v != null && v !== "") el.textContent = v; };
     set("days-alive", (d.days_alive ?? "—") + " 日");
     set("now-doing", d.now_doing ?? "—");
-    set("sleep-cycles", d.sleep_cycles ?? "—");
-  } catch (e) { /* APIが無ければ静かに準備中のまま */ }
+    set("sleep-cycles", (d.sleep_cycles ?? "—").toLocaleString());
+  } catch (e) { /* 取得できなければ静かに準備中のまま */ }
 })();
 </script>
 </body>
