@@ -35,7 +35,11 @@
 <!-- HERO -->
 <section class="hero" style="border-top:none">
   <div class="wrap">
-    <span class="face-wrap"><img class="face" src="assets/somnia_face.png" alt="Somnia の顔"></span>
+    <div class="emo" id="emoFace" data-primary="idle" data-energy="normal" data-mood="calm" role="img" aria-label="Somnia の顔（いまの状態を映しています）">
+      <div class="head"></div>
+      <div class="eye l"></div>
+      <div class="eye r"></div>
+    </div>
     <div class="kicker">A Persistent Cognitive System</div>
     <h1>Somnia</h1>
     <p class="tagline">呼び出すAIではなく、<span class="grad-text">場に生き続けるAI人格。</span></p>
@@ -182,7 +186,27 @@
     set("days-alive", (d.days_alive ?? "—") + " 日");
     set("now-doing", d.now_doing ?? "—");
     set("sleep-cycles", (d.sleep_cycles ?? "—").toLocaleString());
-  } catch (e) { /* 取得できなければ静かに準備中のまま */ }
+    // 顔の表情を「いまの状態」に合わせる (中身は含まない)
+    const face = document.getElementById("emoFace");
+    if (face && d.face) {
+      face.dataset.primary = d.face.primary || "idle";
+      face.dataset.energy = d.face.energy || "normal";
+      face.dataset.mood = d.face.mood || "calm";
+    }
+  } catch (e) { /* 取得できなければ静かに idle のまま */ }
+})();
+
+// 瞬き: 状態に関わらず常に生きている合図 (client 側だけで完結)。
+(function () {
+  const eyes = document.querySelectorAll("#emoFace .eye");
+  if (!eyes.length) return;
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  function blink() {
+    eyes.forEach(e => e.style.setProperty("--lid", ".1"));
+    setTimeout(() => eyes.forEach(e => e.style.removeProperty("--lid")), 150);
+    setTimeout(blink, 2600 + Math.random() * 3800);
+  }
+  setTimeout(blink, 1200);
 })();
 </script>
 </body>

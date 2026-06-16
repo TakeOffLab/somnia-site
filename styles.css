@@ -143,3 +143,33 @@ footer .made b { color: var(--fg); }
   .hero h1 { font-size: 40px; }
   .nav .links { display: none; }
 }
+
+/* ---- live face (EMO-style, content-free state driven) ---- */
+.emo { position: relative; width: 300px; max-width: 80vw; aspect-ratio: 16 / 9;
+  margin: 0 auto 4px; animation: breathe 5.5s ease-in-out infinite; }
+.emo .head { position: absolute; inset: 0;
+  background: url(assets/somnia_head.png) center/contain no-repeat;
+  filter: drop-shadow(0 10px 34px rgba(0,0,0,.45)); }
+.eye { position: absolute; width: 17%; aspect-ratio: 1; border-radius: 50%;
+  --lid: 1; --ty: -50%;
+  transform: translate(-50%, var(--ty)) scaleY(var(--lid));
+  transition: transform .14s ease, opacity .6s ease, filter .6s ease;
+  will-change: transform; }
+.eye.l { left: 22%; top: 52%;
+  background: radial-gradient(circle at 38% 34%, #dbfaff, #35cfe6 52%, #189fc4 82%);
+  box-shadow: 0 0 24px 5px rgba(53,207,230,.5); }
+.eye.r { left: 74%; top: 55%;
+  background: radial-gradient(circle at 38% 34%, #efe6ff, #a78bfa 52%, #7a5ee0 82%);
+  box-shadow: 0 0 24px 5px rgba(167,139,250,.5); }
+
+@keyframes breathe { 0%,100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-3px) scale(1.012); } }
+
+/* states (data-* are set from the content-free face status) */
+.emo[data-primary="sleeping"] .eye { --lid: .16; opacity: .5; }
+.emo[data-primary="sleeping"] { animation-duration: 8.5s; }
+.emo[data-primary="thinking"] .eye { --ty: -58%; }
+.emo[data-energy="drowsy"] .eye, .emo[data-energy="exhausted"] .eye { opacity: .78; filter: saturate(.85); }
+.emo[data-mood="weary"] .eye { --lid: .68; }
+
+@media (prefers-reduced-motion: reduce) { .emo { animation: none; } }
