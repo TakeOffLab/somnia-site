@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20260616-3">
+<link rel="stylesheet" href="styles.css?v=20260616-4">
 </head>
 <body>
 <header class="nav">
@@ -34,6 +34,7 @@
 
 <main>
   <section class="hero" id="top">
+    <canvas class="hero-face" data-somnia-face aria-hidden="true"></canvas>
     <div class="wrap hero-grid">
       <div class="hero-copy">
         <div class="kicker">Persistent Cognitive System</div>
@@ -210,5 +211,6 @@
   setInterval(refresh, 5 * 60 * 1000);
 })();
 </script>
+<script src="somnia-face.js?v=20260616-2"></script>
 </body>
 </html>
