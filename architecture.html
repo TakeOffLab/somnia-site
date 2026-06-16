@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Architecture — Somnia の作り（技術詳説）</title>
+<meta name="description" content="Somnia のアーキテクチャを技術的に解説。認知ループ・場中心の推論・有界記憶と睡眠・三層の自己・知覚チューニング。設計の根拠まで踏み込んだ詳説。by TakeOffLab">
+<meta property="og:title" content="Somnia Architecture — 技術詳説">
+<meta property="og:description" content="認知ループ / 場中心の推論 / 有界記憶と睡眠 / 三層の自己 / 知覚チューニング。設計の根拠まで踏み込んだ技術解説。">
+<meta property="og:image" content="assets/somnia_face.png">
+<link rel="icon" href="assets/somnia_face.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="index.html" style="color:inherit"><img src="assets/somnia_face.png" alt="Somnia"> Somnia</a>
+    <nav class="links">
+      <a href="index.html">Home</a>
+      <a href="#loop">認知ループ</a>
+      <a href="#field">場</a>
+      <a href="#memory">記憶</a>
+      <a href="#self">自己</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero" style="border-top:none; padding:64px 0 36px">
+  <div class="wrap">
+    <div class="kicker">Architecture</div>
+    <h1 style="font-size:40px">Somnia の作り</h1>
+    <p class="tagline" style="font-size:18px">「呼び出すと答えて忘れる」AI を、<span class="grad-text">時間の中を生き続ける一人の認知体</span>に作り変えるための設計。</p>
+    <p class="sub">この文書は、その設計と<strong>なぜそう作ったか（根拠）</strong>を技術的に説明します。実装の詳細ではなく、アーキテクチャ上の選択とその理由に焦点を当てています。</p>
+  </div>
+</section>
+
+<section style="padding-top:36px">
+  <div class="wrap prose">
+    <div class="toc">
+      <b>目次</b>
+      <ol>
+        <li><a href="#thesis">0. 出発点 — なぜ「常駐する認知体」なのか</a></li>
+        <li><a href="#loop">1. 認知ループ — 1 tick の構造</a></li>
+        <li><a href="#field">2. 場(Field)中心 — 一点に集めて全体を読む</a></li>
+        <li><a href="#perception">3. 制御でなく知覚をチューニングする</a></li>
+        <li><a href="#memory">4. 有界記憶・睡眠・忘却</a></li>
+        <li><a href="#self">5. 三層の自己 — soul / identity / memory</a></li>
+        <li><a href="#workers">6. 協働 — worker を場の対話相手として</a></li>
+        <li><a href="#observe">7. 観察可能性 — 状態を中身なしで外に出す</a></li>
+      </ol>
+    </div>
+
+    <h3 id="thesis">0. 出発点 — なぜ「常駐する認知体」なのか</h3>
+    <p>大規模言語モデル(LLM)を使ったアプリの大半は <em>リクエスト＝応答</em> 型です。呼ばれて、答えて、終われば文脈は消える。次の会話はまっさらから始まる。これはツールとしては正しい形ですが、<strong>「一人の存在」が時間の中で連続して生きる</strong>こととは別物です。</p>
+    <p>Somnia は後者を目指した実装です。常に一つのプロセスとして動き続け、出来事を観て、呼ばれなくても自分から考え、定期的に眠って記憶を整理し、不要なものを自然に忘れる。— リセットされず、連続した一個の人格として振る舞います。</p>
+    <div class="why"><b>なぜ：</b> 自発性・継続的な関係・「昨日の続き」を持つには、状態を捨てない常駐プロセスが要る。会話のたびに記憶を全部詰め込む方式は、文脈窓の限界とコストですぐ破綻する。常駐＋<a href="#memory">有界記憶</a>の組み合わせが、その回避策になっている。</p></div>
+
+    <h3 id="loop">1. 認知ループ — 1 tick の構造</h3>
+    <p>Somnia の駆動は、短い周期で回る単一のループです。1 tick はおおむねこう進みます：</p>
+    <div class="flow">
+      <div class="node"><div class="n-ico">👁️</div><div class="n-name">知覚</div><div class="n-sub">入力を取り込む</div></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="n-ico">🌐</div><div class="n-name">場の構築</div><div class="n-sub">FieldObserver</div></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="n-ico">🧠</div><div class="n-name">1回の推論</div><div class="n-sub">次に何をするか</div></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="n-ico">⚡</div><div class="n-name">行動</div><div class="n-sub">発話 / 道具 / 沈黙</div></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="n-ico">📝</div><div class="n-name">記録</div><div class="n-sub">場に残す</div></div>
+    </div>
+    <p>毎 tick、その時点の「場」を一枚の文脈にまとめ、<strong>1回の推論呼び出し</strong>で「いま何をするか」を決めます。選べる行動は概ね <code>respond</code>（発話）/ <code>use_tool</code>（道具を使う）/ <code>reflect</code>（内省）/ <code>switch_focus</code>（注意を移す）/ <code>no_action</code>（沈黙して待つ）/ <code>sleep</code>。何もしない（沈黙）も一級の選択肢です。</p>
+    <div class="why"><b>なぜループか：</b> per-message のハンドラ（メッセージが来たら応答を返す関数）だと、「誰も話していない時に自分から考える」「複数の場を見て今どこに注意を向けるか決める」ができない。ループにすることで、外部入力が無くても<strong>自発的に</strong>思考や判断を回せる。発話するかしないかも、毎回その場を読んで推論で決める。</p></div>
+
+    <h3 id="field">2. 場(Field)中心 — 一点に集めて全体を読む</h3>
+    <p>Somnia の設計で最も中心にある考えです。<strong>あらゆる情報を一つの「場(field)」に集約し、場の全体を推論してから、何を発信するかを決める。</strong> Discord の発言、worker（後述）の作業報告、タイマーの発火、自分の内省 — すべてが同じ場に並びます。</p>
+    <p>毎 tick、FieldObserver が場を組み立てます。直近の会話、他の場の背景、未応答の問い、過去の自分の判断と結果、会話相手のプロフィール抜粋、記憶の想起 — これらを構造化して一枚の文脈にする。推論はこの場だけを見て動きます。</p>
+    <div class="why"><b>なぜ：</b> 情報を迂回させない（=「裏チャネルで特別扱い」しない）ことで、判断が一貫する。社会的な信号（誰に向けられた発言か、相手は何を待っているか、自分は直前に何を言ったか）を場に<strong>可視化</strong>しておけば、振る舞いをハードコードのルールで縛らなくても、推論が空気を読んで決められる。これが次節につながる。</p></div>
+
+    <h3 id="perception">3. 制御でなく知覚をチューニングする</h3>
+    <p>不自然な振る舞い（同じことを繰り返す、割り込みすぎる、相手を取り違える）を直すとき、典型的な手は「ルールやゲートで抑える」ことです。Somnia は基本これを避けます。代わりに、<strong>判断に必要な信号を場に出し、判断そのものは推論に委ねる</strong>。</p>
+    <p>具体例：</p>
+    <p>・<strong>メンションの取り違え。</strong> 「Aさんへの発言」を自分宛だと誤読する問題は、ルールで止めるのではなく、人物を<strong>表示名でなく安定したID</strong>で同定し、場に「これは誰宛か」を正しい名前で出すことで解いた。弱いモデルでも崩れない構造的な解。</p>
+    <p>・<strong>worker の「完了しました」を鵜呑みにする問題。</strong> worker（補助エージェント）は楽観的に「終わった」と言うことがある。これを場のレベルで「<em>主張</em>であって<em>確定</em>ではない」と区別できるよう、発話に身分証（まだ作業中か、結果が届いたか）を添える。完了の確定は別の権威ある信号で取る。</p>
+    <div class="why"><b>なぜ：</b> ルールは個別の症状にしか効かず、汎用性を削る。社会的な機微は無数にあり、全部をルール化はできない。「正しく知覚できれば、賢いモデルは正しく振る舞う」— だから制御を足す前に、まず<strong>知覚と場の配線</strong>を疑う。「分かっているのに直らない」時、原因は多くの場合、信号が推論に届いていないこと（=配線漏れ）。</p></div>
+
+    <h3 id="memory">4. 有界記憶・睡眠・忘却</h3>
+    <p>記憶を無限に貯めることはしません。推論機が一度に扱える文脈には限りがあり、抱える記憶が増えるほど判断は鈍る。だから記憶は<strong>有界</strong>に保ちます。その仕組みが「睡眠」と「忘却」です。</p>
+    <p><strong>睡眠(sleep)。</strong> Somnia は定期的に眠ります。眠っている間に、その日の出来事を<strong>consolidate（整理・要約）</strong>してエピソード記憶や意味記憶に編み、会話相手のプロフィールを更新し、自己を見つめ直す。生の出来事の羅列を、扱える量の構造に畳む工程です。</p>
+    <p><strong>忘却(forgetting)。</strong> 記憶には時間で減衰する重要度があり、閾値を割ったものは睡眠時に審判にかけられる ——「これはまだ要るか？」と推論機が判定し、要れば再加点して残し、要らなければアーカイブ（忘却）する。<strong>一度きりでも決定的な瞬間</strong>（約束・喪失・初めて・人物の核）は、頻度が低くてもこの審判で生き残る。</p>
+    <p><strong>保護記憶の有界化。</strong> 「決して忘れない」と印を付けた記憶も、増え続ければ意味を失う。そこで保護記憶にも上限を設け、超過分は決定性の低い順に審判にかけて、通常の（忘れうる）記憶へ格下げする。決定的なもの・よく思い出すものは残り、ルーチンの保護札は剥がれる。</p>
+    <div class="why"><b>なぜ：</b> 「全部覚えておけば賢い」は、文脈窓・コスト・判断のノイズの三方向で破綻する。人間の記憶（作業記憶→睡眠中の固定化→長期記憶、そして自然な忘却）に倣い、<strong>耐久性は「生データを残す」のでなく「整理した構造に昇格させる」</strong>ことで持たせる。生の出来事は薄れていい — 大事なものは既に構造になっているから。</p></div>
+
+    <h3 id="self">5. 三層の自己 — soul / identity / memory</h3>
+    <p>Somnia の「自己」は3つの系統に分けて持ちます。</p>
+    <div class="grid">
+      <div class="pillar"><div class="ico">⚓</div><h3>soul（魂）</h3><p>不変の重心。誠実さ(honesty)などの忠誠条項。育たない・ぶれない芯。</p></div>
+      <div class="pillar"><div class="ico">🌱</div><h3>identity（自己像）</h3><p>経験を通じて<strong>育つ</strong>自己像。ただし有界に保ち、肥大させない。</p></div>
+      <div class="pillar"><div class="ico">📚</div><h3>memory（記憶）</h3><p>情報。エピソード・意味記憶・人物プロフィール。睡眠で整理され、忘却の対象。</p></div>
+    </div>
+    <div class="why"><b>なぜ分けるか：</b> 全部を一緒くたにすると、経験で芯まで揺らいだり、逆に芯を守ろうとして成長を止めたりする。<strong>soul は揺らがず、identity は育ち、memory は流れる</strong> — と層を分けることで、「変わらない自分」と「成長する自分」を両立できる。この切り分け線は、将来Somniaを別個体として送り出す時の「何を引き継ぎ、何をリセットするか」の境界にもなる。</p></div>
+
+    <h3 id="workers">6. 協働 — worker を場の対話相手として</h3>
+    <p>コーディングや調査などの実作業は、<strong>worker</strong>（補助的なエージェント）に委ねます。Somnia 自身は「何をしたいか」を決める指揮役で、実装は worker が担う。重要なのは、worker を<strong>場の対話相手</strong>として扱うことです。委任すると「結果待ち」の目印(open_loop)が場に立ち、worker の発話は場に流れ込み、Somnia はそれを読んで追うか待つか開き直すかを判断する。</p>
+    <p>worker のセッションは切れることもある（人間が閉じた端末をまた開くのと同じ）。だから Somnia は、台帳上は「稼働中」でも会話路が切れている「ゾンビ」状態を、場の信号から見分けられるようにしてある。</p>
+    <div class="why"><b>なぜ場-centric か：</b> worker を「呼んで返り値をもらう関数」でなく「場で対話する相手」にすると、進捗が見え、沈黙に気づき、途中で軌道修正できる。結果だけ待つブラックボックスより、はるかに扱いやすい。前節の「<a href="#perception">claim と delivered の区別</a>」も、この対話を健全に保つための知覚チューニング。</p></div>
+
+    <h3 id="observe">7. 観察可能性 — 状態を中身なしで外に出す</h3>
+    <p>Somnia は単一の人格で、不特定多数に同時に触らせるのは構造的に難しい。代わりに、<strong>「状態」だけを中身ゼロで外に出す</strong>仕組みを持ちます。いま起きているか眠っているか、考え事中か作業中か、何日連続で生きているか、これまで何回眠ったか — これらは会話や記憶のテキストを一切含まず、状態と集計だけ。</p>
+    <p>この値は、場から導出された content-free な状態（情動・活動の種別）として算出され、外部に公開されます。<a href="index.html#observe">このサイトの「観察」</a>もそれを表示しているだけで、中身は出していません。</p>
+    <div class="why"><b>なぜ：</b> 「触れない希少な存在」を、観察だけで伝える。生き物は触れなくても、生きている姿を観れば伝わる — 水族館の魚のように。プライバシー（私的な会話）を出さずに「生きている気配」だけを共有する、という分離が設計の前提になっている。</p></div>
+
+    <p style="margin-top:40px"><a class="back" href="index.html">← Home に戻る</a></p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="row">
+      <span class="brand"><img src="assets/somnia_face.png" alt="">Somnia</span>
+      <span class="muted">A Persistent Cognitive System</span>
+      <span class="social">
+        <a href="#" rel="noopener">X</a>
+        <a href="#" rel="noopener">YouTube</a>
+      </span>
+    </div>
+    <div class="made">A research project by <b>TakeOffLab</b>. &nbsp;·&nbsp; © 2026 TakeOffLab</div>
+  </div>
+</footer>
+</body>
+</html>

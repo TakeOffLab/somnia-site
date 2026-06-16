@@ -144,53 +144,21 @@ footer .made b { color: var(--fg); }
   .nav .links { display: none; }
 }
 
-/* ---- live face (EMO-style, content-free state driven) ---- */
-.emo { position: relative; width: 300px; max-width: 80vw; aspect-ratio: 16 / 9;
-  margin: 0 auto 4px; animation: breathe 5.5s ease-in-out infinite; }
-.emo .head { position: absolute; inset: 0;
-  background: url(assets/somnia_head.png) center/contain no-repeat;
-  filter: drop-shadow(0 10px 34px rgba(0,0,0,.45)); }
-.eye { position: absolute; width: 17%; aspect-ratio: 1; border-radius: 50%;
-  --lid: 1; --ty: -50%; --bright: 1; --tilt: 0deg;
-  transform: translate(-50%, var(--ty)) scaleY(var(--lid)) rotate(var(--tilt));
-  filter: brightness(var(--bright));
-  transition: transform .25s ease, opacity .6s ease, filter .6s ease;
-  will-change: transform; }
-.eye.l { left: 22%; top: 52%;
-  background: radial-gradient(circle at 38% 34%, #dbfaff, #35cfe6 52%, #189fc4 82%);
-  box-shadow: 0 0 24px 5px rgba(53,207,230,.5); }
-.eye.r { left: 74%; top: 55%;
-  background: radial-gradient(circle at 38% 34%, #efe6ff, #a78bfa 52%, #7a5ee0 82%);
-  box-shadow: 0 0 24px 5px rgba(167,139,250,.5); }
-
-@keyframes breathe { 0%,100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-3px) scale(1.012); } }
-
-/* --- mood (glow の明るさ + 目の形) : desktop の語彙に対応 --- */
-.emo[data-mood="content"] .eye { --bright: 1.06; }                 /* ごきげん */
-.emo[data-mood="curious"] .eye { --bright: 1.24; }                 /* わくわく */
-.emo[data-mood="focused"] .eye { --bright: 1.14; --lid: .84; }     /* 集中: 少し細める */
-.emo[data-mood="happy"]   .eye { --bright: 1.34; --lid: 1.06; }    /* うれしい: ぱっと明るく */
-.emo[data-mood="weary"]   .eye { --bright: .8;  --lid: .5; opacity: .78; } /* お疲れ: 半眼 */
-.emo[data-mood="anxious"] .eye { --bright: .9; }                   /* 焦り: 困り眉 */
-.emo[data-mood="anxious"] .eye.l { --tilt: -10deg; }
-.emo[data-mood="anxious"] .eye.r { --tilt: 10deg; }
-
-/* --- primary (必要な所だけ上書き; mood より後＝優先) --- */
-.emo[data-primary="thinking"] .eye { --ty: -57%; }                 /* 考え事: 視線上 */
-.emo[data-primary="waking_up"] .eye { --bright: 1.2; }
-.emo[data-primary="llm_offline"] .eye { --bright: .4; opacity: .4; } /* ぐあい悪い */
-.emo[data-primary="sleeping"] .eye { --lid: .14; opacity: .5; }    /* おやすみ */
-.emo[data-primary="sleeping"] { animation-duration: 8.5s; }
-
-/* --- energy --- */
-.emo[data-energy="drowsy"] .eye, .emo[data-energy="exhausted"] .eye { opacity: .78; }
-
-/* --- effects: timer 発火の sparkle (一瞬キラッ) --- */
-.emo.sparkle .eye { animation: sparkle .9s ease; }
-@keyframes sparkle { 0%,100% { filter: brightness(var(--bright)); } 40% { filter: brightness(1.9); } }
-
-@media (prefers-reduced-motion: reduce) { .emo { animation: none; } }
-
+/* state caption under the hero icon */
 .emo-caption { text-align: center; color: var(--muted); font-size: 13px;
-  letter-spacing: .5px; margin: 2px 0 6px; min-height: 18px; }
+  letter-spacing: .5px; margin: 10px 0 6px; min-height: 18px; }
+
+/* ---- architecture / long-form page ---- */
+.prose { max-width: 760px; }
+.prose p { color: #c7ccdb; margin: 12px 0; }
+.prose h3 { font-size: 19px; margin: 28px 0 6px; }
+.prose code { background: var(--panel-2); border: 1px solid var(--border); border-radius: 5px;
+  padding: 1px 6px; font-size: 13px; color: #b8e6f0; }
+.why { border-left: 3px solid var(--purple); background: color-mix(in srgb, var(--purple) 8%, var(--panel));
+  border-radius: 0 10px 10px 0; padding: 12px 18px; margin: 14px 0; }
+.why b { color: var(--purple); }
+.toc { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px 22px; margin-top: 22px; }
+.toc ol { margin: 6px 0 0; padding-left: 20px; color: var(--muted); }
+.toc li { margin: 3px 0; }
+.toc a { color: var(--fg); }
+.back { display: inline-block; margin-bottom: 8px; color: var(--muted); font-size: 14px; }
