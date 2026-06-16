@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20260616-9">
+<link rel="stylesheet" href="styles.css?v=20260616-10">
 </head>
 <body class="home-page">
 <canvas class="site-face" data-somnia-face aria-hidden="true"></canvas>
@@ -46,16 +46,11 @@
           <a class="btn" href="architecture.html">Architecture</a>
           <a class="btn" href="contact.html">Contact</a>
         </div>
-        <div class="live hero-live" aria-label="Somnia live status">
+        <div class="live hero-live" aria-label="Somnia live metrics">
           <article class="stat">
             <div class="label">連続稼働</div>
             <div class="value grad" data-stat="days-alive">-- 日</div>
             <div class="hint">リセットせず続いている日数</div>
-          </article>
-          <article class="stat">
-            <div class="label">現在</div>
-            <div class="value compact" data-stat="now-doing">準備中</div>
-            <div class="hint">起きている / 考えている / 作業中 / 眠っている など</div>
           </article>
           <article class="stat">
             <div class="label">睡眠回数</div>
@@ -193,7 +188,6 @@
       const d = await r.json();
       set("days-alive", `${d.days_alive ?? fallback} 日`);
       const nowDoing = displayStatus(d.now_doing);
-      set("now-doing", nowDoing);
       set("sleep-cycles", (d.sleep_cycles ?? fallback).toLocaleString());
 
       const cap = document.getElementById("emoCaption");
