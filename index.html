@@ -40,6 +40,7 @@
       <div class="eye l"></div>
       <div class="eye r"></div>
     </div>
+    <div class="emo-caption" id="emoCaption" aria-live="polite">—</div>
     <div class="kicker">A Persistent Cognitive System</div>
     <h1>Somnia</h1>
     <p class="tagline">呼び出すAIではなく、<span class="grad-text">場に生き続けるAI人格。</span></p>
@@ -174,26 +175,35 @@
   </div>
 </footer>
 
-<!-- ライブ観察用フック (公開APIが整ったら data-stat を埋める。今は静かにフォールバック) -->
+<!-- ライブ観察用フック: Somnia が定期 push する content-free ステータスを fetch -->
 <script>
-(async function () {
+(function () {
   // Somnia 自身が定期 push する content-free ステータス (status ブランチ)。
   const API = "https://raw.githubusercontent.com/TakeOffLab/somnia-site/status/status.json";
-  try {
-    const r = await fetch(API, { cache: "no-store" });
-    const d = await r.json();
-    const set = (k, v) => { const el = document.querySelector(`[data-stat="${k}"]`); if (el && v != null && v !== "") el.textContent = v; };
-    set("days-alive", (d.days_alive ?? "—") + " 日");
-    set("now-doing", d.now_doing ?? "—");
-    set("sleep-cycles", (d.sleep_cycles ?? "—").toLocaleString());
-    // 顔の表情を「いまの状態」に合わせる (中身は含まない)
-    const face = document.getElementById("emoFace");
-    if (face && d.face) {
-      face.dataset.primary = d.face.primary || "idle";
-      face.dataset.energy = d.face.energy || "normal";
-      face.dataset.mood = d.face.mood || "calm";
-    }
-  } catch (e) { /* 取得できなければ静かに idle のまま */ }
+  const face = document.getElementById("emoFace");
+  const set = (k, v) => { const el = document.querySelector(`[data-stat="${k}"]`); if (el && v != null && v !== "") el.textContent = v; };
+  async function refresh() {
+    try {
+      const r = await fetch(API, { cache: "no-store" });
+      const d = await r.json();
+      set("days-alive", (d.days_alive ?? "—") + " 日");
+      set("now-doing", d.now_doing ?? "—");
+      set("sleep-cycles", (d.sleep_cycles ?? "—").toLocaleString());
+      const cap = document.getElementById("emoCaption");
+      if (cap && d.now_doing) cap.textContent = "いま、" + d.now_doing;
+      if (face && d.face) {
+        face.dataset.primary = d.face.primary || "idle";
+        face.dataset.energy = d.face.energy || "normal";
+        face.dataset.mood = d.face.mood || "calm";
+        if (Array.isArray(d.face.effects) && d.face.effects.includes("sparkle")) {
+          face.classList.remove("sparkle"); void face.offsetWidth; face.classList.add("sparkle");
+          setTimeout(() => face.classList.remove("sparkle"), 1000);
+        }
+      }
+    } catch (e) { /* 取得できなければ静かに idle のまま */ }
+  }
+  refresh();
+  setInterval(refresh, 5 * 60 * 1000);  // 5分ごと (raw のキャッシュも5分)
 })();
 
 // 瞬き: 状態に関わらず常に生きている合図 (client 側だけで完結)。

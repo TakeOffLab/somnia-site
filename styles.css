@@ -151,9 +151,10 @@ footer .made b { color: var(--fg); }
   background: url(assets/somnia_head.png) center/contain no-repeat;
   filter: drop-shadow(0 10px 34px rgba(0,0,0,.45)); }
 .eye { position: absolute; width: 17%; aspect-ratio: 1; border-radius: 50%;
-  --lid: 1; --ty: -50%;
-  transform: translate(-50%, var(--ty)) scaleY(var(--lid));
-  transition: transform .14s ease, opacity .6s ease, filter .6s ease;
+  --lid: 1; --ty: -50%; --bright: 1; --tilt: 0deg;
+  transform: translate(-50%, var(--ty)) scaleY(var(--lid)) rotate(var(--tilt));
+  filter: brightness(var(--bright));
+  transition: transform .25s ease, opacity .6s ease, filter .6s ease;
   will-change: transform; }
 .eye.l { left: 22%; top: 52%;
   background: radial-gradient(circle at 38% 34%, #dbfaff, #35cfe6 52%, #189fc4 82%);
@@ -165,11 +166,31 @@ footer .made b { color: var(--fg); }
 @keyframes breathe { 0%,100% { transform: translateY(0) scale(1); }
   50% { transform: translateY(-3px) scale(1.012); } }
 
-/* states (data-* are set from the content-free face status) */
-.emo[data-primary="sleeping"] .eye { --lid: .16; opacity: .5; }
+/* --- mood (glow の明るさ + 目の形) : desktop の語彙に対応 --- */
+.emo[data-mood="content"] .eye { --bright: 1.06; }                 /* ごきげん */
+.emo[data-mood="curious"] .eye { --bright: 1.24; }                 /* わくわく */
+.emo[data-mood="focused"] .eye { --bright: 1.14; --lid: .84; }     /* 集中: 少し細める */
+.emo[data-mood="happy"]   .eye { --bright: 1.34; --lid: 1.06; }    /* うれしい: ぱっと明るく */
+.emo[data-mood="weary"]   .eye { --bright: .8;  --lid: .5; opacity: .78; } /* お疲れ: 半眼 */
+.emo[data-mood="anxious"] .eye { --bright: .9; }                   /* 焦り: 困り眉 */
+.emo[data-mood="anxious"] .eye.l { --tilt: -10deg; }
+.emo[data-mood="anxious"] .eye.r { --tilt: 10deg; }
+
+/* --- primary (必要な所だけ上書き; mood より後＝優先) --- */
+.emo[data-primary="thinking"] .eye { --ty: -57%; }                 /* 考え事: 視線上 */
+.emo[data-primary="waking_up"] .eye { --bright: 1.2; }
+.emo[data-primary="llm_offline"] .eye { --bright: .4; opacity: .4; } /* ぐあい悪い */
+.emo[data-primary="sleeping"] .eye { --lid: .14; opacity: .5; }    /* おやすみ */
 .emo[data-primary="sleeping"] { animation-duration: 8.5s; }
-.emo[data-primary="thinking"] .eye { --ty: -58%; }
-.emo[data-energy="drowsy"] .eye, .emo[data-energy="exhausted"] .eye { opacity: .78; filter: saturate(.85); }
-.emo[data-mood="weary"] .eye { --lid: .68; }
+
+/* --- energy --- */
+.emo[data-energy="drowsy"] .eye, .emo[data-energy="exhausted"] .eye { opacity: .78; }
+
+/* --- effects: timer 発火の sparkle (一瞬キラッ) --- */
+.emo.sparkle .eye { animation: sparkle .9s ease; }
+@keyframes sparkle { 0%,100% { filter: brightness(var(--bright)); } 40% { filter: brightness(1.9); } }
 
 @media (prefers-reduced-motion: reduce) { .emo { animation: none; } }
+
+.emo-caption { text-align: center; color: var(--muted); font-size: 13px;
+  letter-spacing: .5px; margin: 2px 0 6px; min-height: 18px; }
