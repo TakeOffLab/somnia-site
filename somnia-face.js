@@ -325,12 +325,13 @@
       const primary = this.faceState();
       const speed = speedByEnergy[this.state.energy] || 1;
       const t = tRaw * speed;
+      const faceRect = this.coverRect(this.images.base, w, h);
 
       ctx.clearRect(0, 0, w, h);
-      this.drawCoverImage(this.images.base, 0, 0, w, h);
+      this.drawCoverImage(this.images.base, faceRect);
 
       if (primary === "sleeping") {
-        this.drawSleeping(t);
+        this.drawSleeping(t, faceRect);
         return;
       }
 
@@ -341,8 +342,8 @@
       }
 
       const range = stateRange[primary] || 1;
-      let dx = motion.x * range * (w / 1920);
-      let dy = motion.y * range * (h / 1080);
+      let dx = motion.x * range * (faceRect.w / 1920);
+      let dy = motion.y * range * (faceRect.h / 1080);
       let glow = 0.74 + motion.pop * 0.28 + (moodGlow[this.state.mood] || 0);
       let squash = this.blinkSquash(t, primary);
       let scale = 1;
@@ -351,7 +352,7 @@
         glow += 0.12 + 0.06 * Math.sin(t * 5);
         scale = 1.01;
       } else if (primary === "thinking") {
-        dy -= 4 * (h / 1080);
+        dy -= 4 * (faceRect.h / 1080);
         squash = Math.min(squash, 0.78);
       } else if (primary === "speaking") {
         dx *= 0.35;
@@ -380,37 +381,40 @@
         glow += 0.18 * Math.max(0, Math.sin(t * 18));
       }
 
-      this.drawEye("leftEye", dx, dy, Math.max(0.06, squash), scale, glow);
-      this.drawEye("rightEye", dx, dy, Math.max(0.06, squash), scale, glow);
+      this.drawEye("leftEye", dx, dy, Math.max(0.06, squash), scale, glow, faceRect);
+      this.drawEye("rightEye", dx, dy, Math.max(0.06, squash), scale, glow, faceRect);
     }
 
-    drawCoverImage(img, x, y, w, h) {
+    coverRect(img, w, h) {
       const scale = Math.max(w / img.naturalWidth, h / img.naturalHeight);
-      const sw = w / scale;
-      const sh = h / scale;
-      const sx = (img.naturalWidth - sw) / 2;
-      const sy = (img.naturalHeight - sh) / 2;
-      this.ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+      return {
+        x: (w - img.naturalWidth * scale) / 2,
+        y: (h - img.naturalHeight * scale) / 2,
+        w: img.naturalWidth * scale,
+        h: img.naturalHeight * scale,
+      };
     }
 
-    eyePlacement(key) {
-      const w = this.canvas.width;
-      const h = this.canvas.height;
+    drawCoverImage(img, rect) {
+      this.ctx.drawImage(img, rect.x, rect.y, rect.w, rect.h);
+    }
+
+    eyePlacement(key, faceRect) {
       const img = this.eyeLayers[key] || this.images[key];
       const isLeft = key === "leftEye";
-      const targetW = w * 0.49;
+      const targetW = faceRect.w * 0.49;
       const sourceW = img.naturalWidth || img.width;
       const sourceH = img.naturalHeight || img.height;
       const targetH = targetW * (sourceH / sourceW);
-      const cx = w * (isLeft ? 0.255 : 0.765);
-      const cy = h * 0.59;
+      const cx = faceRect.x + faceRect.w * (isLeft ? 0.255 : 0.765);
+      const cy = faceRect.y + faceRect.h * 0.59;
       return { x: cx - targetW / 2, y: cy - targetH / 2, w: targetW, h: targetH };
     }
 
-    drawEye(key, dx, dy, squash, scale, glow) {
+    drawEye(key, dx, dy, squash, scale, glow, faceRect) {
       const ctx = this.ctx;
       const img = this.eyeLayers[key] || this.images[key];
-      const p = this.eyePlacement(key);
+      const p = this.eyePlacement(key, faceRect);
       const cx = p.x + p.w / 2 + dx;
       const cy = p.y + p.h / 2 + dy;
       const dw = p.w * scale;
@@ -462,18 +466,18 @@
       ctx.clip();
     }
 
-    drawSleeping(t) {
+    drawSleeping(t, faceRect) {
       const ctx = this.ctx;
-      const w = this.canvas.width;
-      const h = this.canvas.height;
-      const y = h * (0.56 + Math.sin(t * 1.4) * 0.005);
+      const w = faceRect.w;
+      const h = faceRect.h;
+      const y = faceRect.y + h * (0.56 + Math.sin(t * 1.4) * 0.005);
       ctx.save();
       ctx.strokeStyle = "rgba(142, 229, 255, .78)";
       ctx.lineWidth = Math.max(4, w * 0.006);
       ctx.lineCap = "round";
       ctx.shadowColor = "rgba(92, 220, 255, .52)";
       ctx.shadowBlur = Math.max(12, w * 0.018);
-      for (const x of [w * 0.31, w * 0.78]) {
+      for (const x of [faceRect.x + w * 0.31, faceRect.x + w * 0.78]) {
         ctx.beginPath();
         ctx.moveTo(x - w * 0.07, y);
         ctx.quadraticCurveTo(x, y + h * 0.035, x + w * 0.07, y);
