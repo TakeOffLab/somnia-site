@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Architecture - Somniaの構造</title>
-<meta name="description" content="Somniaの構成。EventStore、FieldObserver、認知ループ、記憶と睡眠、worker委任、公開状態について。">
+<meta name="description" content="Somniaの構成。イベントログ、場の観測、認知ループ、記憶と睡眠、ワーカー連携、公開ステータスについて。">
 <meta property="og:title" content="Somnia Architecture">
 <meta property="og:description" content="場を読み、判断し、行動し、眠って記憶を整理する常駐型の自立型AIの構造。">
 <meta property="og:image" content="assets/somnia_head.png">
@@ -12,9 +12,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20260616-7">
+<link rel="stylesheet" href="styles.css?v=20260616-8">
 </head>
-<body>
+<body class="architecture-page">
 <canvas class="site-face" data-somnia-face aria-hidden="true"></canvas>
 <div class="site-smoke" aria-hidden="true"></div>
 <header class="nav">
@@ -49,101 +49,101 @@
           <li><a href="#field">場</a></li>
           <li><a href="#memory">記憶と睡眠</a></li>
           <li><a href="#self">三層の自己</a></li>
-          <li><a href="#workers">worker委任</a></li>
+          <li><a href="#workers">ワーカー連携</a></li>
           <li><a href="#observe">観測可能性</a></li>
         </ol>
       </nav>
 
       <h2 id="overview">概要</h2>
-      <p>Somniaは、Discordやworker、内部イベント、時刻信号などを継続的に取り込み、EventStoreへ記録します。状態はEventStoreから復元され、場、記憶、未完了の課題、直近の判断をもとに次の行動が選ばれます。</p>
-      <p>主な構成は、入力を観測するObserver、全イベントを保存するEventStore、状態を復元するStateManager、判断材料をまとめるFieldObserver、行動を選ぶCognitive Loop、記憶を整理するSleepManager、外部作業を扱うTool Layerです。</p>
+      <p>Somniaは、Discordでの会話、ワーカーからの報告、内部イベント、時刻信号などを継続的に取り込み、イベントログへ保存します。現在の状態はそのログから復元され、場、記憶、未完了の課題、直近の判断をもとに次の行動が選ばれます。</p>
+      <p>主な構成は、入力を観測する層、すべての出来事を残すイベントログ、状態を復元する層、判断材料をまとめる場の観測層、行動を選ぶ認知ループ、記憶を整理するスリープ、外部作業を扱うツール層です。</p>
       <div class="grid compact-grid">
         <article class="pillar">
-          <span class="num">EventStore</span>
+          <span class="num">ログ</span>
           <h3>全イベントの記録</h3>
-          <p>会話、内部信号、tool結果、worker報告を時系列のraw memoryとして保存します。</p>
+          <p>会話、内部信号、ツールの結果、ワーカーの報告を時系列のログとして保存します。</p>
         </article>
         <article class="pillar">
-          <span class="num">StateManager</span>
+          <span class="num">ステート</span>
           <h3>状態の復元</h3>
-          <p>mode、topics、aliases、sleep pressure、context load、self modelをイベントから復元します。</p>
+          <p>現在の状態、話題、呼ばれ方、眠気、文脈の重さ、自己像をイベントから復元します。</p>
         </article>
         <article class="pillar">
-          <span class="num">Tool Layer</span>
-          <h3>行動結果の着地</h3>
-          <p>検索、記憶参照、worker委任などをaction_requestとaction_resultとして場へ戻します。</p>
+          <span class="num">ツール</span>
+          <h3>結果の着地</h3>
+          <p>検索、記憶参照、ワーカー委任などの結果を、次の判断材料として場へ戻します。</p>
         </article>
       </div>
 
       <h2 id="loop">認知ループ</h2>
-      <p>中心にあるのは、知覚、場の構築、判断、行動、記録を繰り返すループです。各tickでFieldObserverがFieldStateを作り、Cognitive Loopがひとつのactionを選びます。</p>
+      <p>中心にあるのは、知覚、場の構築、判断、行動、記録を繰り返すループです。一定の間隔でフィールド観測が現在の文脈をまとめ、認知ループがひとつの行動を選びます。</p>
       <div class="flow">
-        <div class="node"><div class="n-name">知覚</div><div class="n-sub">Perception</div></div>
+        <div class="node"><div class="n-name">知覚</div><div class="n-sub">入力を受ける</div></div>
         <div class="arrow">→</div>
-        <div class="node"><div class="n-name">場</div><div class="n-sub">Field</div></div>
+        <div class="node"><div class="n-name">場</div><div class="n-sub">文脈をまとめる</div></div>
         <div class="arrow">→</div>
-        <div class="node"><div class="n-name">判断</div><div class="n-sub">Decision</div></div>
+        <div class="node"><div class="n-name">判断</div><div class="n-sub">次を選ぶ</div></div>
         <div class="arrow">→</div>
-        <div class="node"><div class="n-name">行動</div><div class="n-sub">Action</div></div>
+        <div class="node"><div class="n-name">行動</div><div class="n-sub">話す・待つ・任せる</div></div>
         <div class="arrow">→</div>
-        <div class="node"><div class="n-name">記録</div><div class="n-sub">Memory</div></div>
+        <div class="node"><div class="n-name">記録</div><div class="n-sub">次へ残す</div></div>
       </div>
-      <p>actionには、respond、no_action、sleep、use_tool、switch_focusなどがあります。沈黙や待機も明示的な選択肢として扱われ、必要なときだけ発話や委任が行われます。</p>
+      <p>行動には、返答する、待機する、眠る、道具を使う、注目先を切り替える、といった選択肢があります。沈黙や待機も明示的な選択肢として扱われ、必要なときだけ発話や委任が行われます。</p>
 
       <h2 id="field">場</h2>
-      <p>場は、判断に必要な情報を一時的に集約した構造です。直近の会話、内部信号、関連記憶、workerの進捗、未完了のopen loop、睡眠圧、アーカイブ圧などが同じ単位で扱われます。</p>
-      <p>FieldObserverはwatermark以降の新着イベントを取り込み、現在のFieldStateを構築します。複数の入力源を場に集めることで、Somniaは一件ごとの反応よりも、現在の文脈全体に対する判断を行います。</p>
-      <div class="note"><b>Multi-field</b> Discordでの会話、workerとの作業連携、内部の自己記録は、それぞれ別の場として扱えます。workerの途中報告もobserved_messageとして入り、次の判断材料になります。</div>
+      <p>場は、判断に必要な情報を一時的に集約した構造です。直近の会話、内部信号、関連記憶、ワーカーの進捗、未完了の課題、眠気、記憶量の圧迫などが同じ単位で扱われます。</p>
+      <p>フィールド観測は新着イベントを取り込み、現在の文脈を構築します。複数の入力源を場に集めることで、Somniaは一件ごとの反応よりも、現在の文脈全体に対する判断を行います。</p>
+      <div class="note"><b>複数の場</b> Discordでの会話、ワーカーとの連携、内部の自己記録は、それぞれ別の場として扱えます。途中報告も観測された発話として入り、次の判断材料になります。</div>
 
       <h2 id="memory">記憶と睡眠</h2>
-      <p>記憶は、raw event、episode、semantic memory、journal、user profileなどに分かれます。必要なときにはrecall_episode、read_journal、user_profile、search_log、read_file、search_semanticsといったtoolで明示的に参照されます。</p>
-      <p>SleepManagerは、一定量たまったイベントをepisodeとsemantic memoryへ圧縮し、短期コンテキストを短くします。睡眠時にはjudgment_reflectionも記録され、直近の判断や発話の扱いが次回以降の材料になります。</p>
-      <p>長期運用のため、bounded memoryの仕組みも入っています。access footprint、decay、hall of fame、archive、忘却ノルマにより、推論時に扱う記憶量を保ちます。archiveへ移ったイベントは削除されず、通常の想起対象から外れます。</p>
+      <p>記憶は、生の出来事、エピソード、意味記憶、ジャーナル、相手ごとのプロフィールなどに分かれます。必要なときには、過去のエピソードを思い出す、ジャーナルを読む、相手の情報を確認する、ログやファイルを探す、意味的に近い記憶を探す、といった形で明示的に参照されます。</p>
+      <p>スリープでは、一定量たまったイベントをエピソードと意味記憶へ圧縮し、短期コンテキストを短くします。スリープ中には直近の判断を振り返る記録も残され、次回以降の判断材料になります。</p>
+      <p>長期運用のため、記憶量を一定範囲に保つ仕組みも入っています。参照された足跡、時間による減衰、重要記憶の保護、アーカイブ、忘却ノルマにより、推論時に扱う記憶量を保ちます。アーカイブへ移ったイベントは削除されず、通常の想起対象から外れます。</p>
 
       <h2 id="self">三層の自己</h2>
       <div class="grid compact-grid">
         <article class="pillar">
-          <span class="num">soul</span>
+          <span class="num">核</span>
           <h3>変えにくい核</h3>
           <p>責任、誠実さ、他者尊重など、行動の底に置く長期的な方針です。</p>
         </article>
         <article class="pillar">
-          <span class="num">identity</span>
+          <span class="num">自己像</span>
           <h3>更新される自己像</h3>
-          <p>self_model、identity_box、呼ばれ方、最近の判断から、Somnia自身の捉え方を更新します。</p>
+          <p>自分の動作理解、呼ばれ方、最近の判断から、Somnia自身の捉え方を更新します。</p>
         </article>
         <article class="pillar">
-          <span class="num">journal / arc</span>
+          <span class="num">日記</span>
           <h3>連続性の記録</h3>
           <p>日々の出来事や自己理解を一人称の記録として残し、時間をまたいだ文脈を支えます。</p>
         </article>
       </div>
 
-      <h2 id="workers">worker委任</h2>
-      <p>調査、実装、レビュー、修正のような重い作業は、delegate_to_workerを通じてworkerへ委任されます。委任時にはopen loopが立ち、workerの中間発話や完了報告はopencode_collabの場へ戻ります。</p>
-      <p>Somniaはworkerの進捗を観測し、必要に応じてrespondで返答し、final発話でopen loopを解決します。対象が不明な委任は推測で進めず、blockedとして質問を返す設計です。</p>
+      <h2 id="workers">ワーカー連携</h2>
+      <p>調査、実装、レビュー、修正のような重い作業は、ワーカーへ委任されます。委任時には未完了の課題として記録され、中間発話や完了報告は作業連携用の場へ戻ります。</p>
+      <p>Somniaは進捗を観測し、必要に応じて返答し、完了報告で未完了の課題を閉じます。対象が不明な委任は推測で進めず、確認質問を返す設計です。</p>
       <div class="grid compact-grid">
         <article class="pillar">
-          <span class="num">coder</span>
+          <span class="num">コーダー</span>
           <h3>実装</h3>
-          <p>コード変更や調査を伴う作業を任せるworker typeです。</p>
+          <p>コード変更や調査を伴う作業を任せるワーカーです。</p>
         </article>
         <article class="pillar">
-          <span class="num">reviewer</span>
+          <span class="num">レビュアー</span>
           <h3>確認</h3>
-          <p>変更のリスク、抜け、テスト観点を確認するworker typeです。</p>
+          <p>変更のリスク、抜け、テスト観点を確認するワーカーです。</p>
         </article>
         <article class="pillar">
-          <span class="num">researcher</span>
+          <span class="num">リサーチャー</span>
           <h3>調査</h3>
-          <p>外部情報や大きな探索を整理し、場へ結果を戻すworker typeです。</p>
+          <p>外部情報や大きな探索を整理し、場へ結果を戻すワーカーです。</p>
         </article>
       </div>
 
       <h2 id="observe">観測可能性</h2>
-      <p>公開ページには、連続稼働日数、現在の状態、睡眠回数、顔の表示に使う軽量なstatusだけを出します。会話、記憶、思考内容は公開データに含めません。</p>
-      <p>ローカルviewerでは、目の形、光、mood、flash、beaconなどを使って状態が表現されます。このサイトでは同じ顔素材を使い、公開可能なstatusをもとに背景のSomniaを描画します。</p>
-      <div class="note"><b>公開範囲</b> statusはcontent-freeな信号に限定しています。存在や稼働の気配は見える一方で、個別の会話や内部記憶は外へ出ない構成です。</div>
+      <p>公開ページには、連続稼働日数、現在のステータス、睡眠回数、顔の表示に使う軽量な状態情報だけを出します。会話、記憶、思考内容は公開データに含めません。</p>
+      <p>ローカルのビューアーでは、目の形、光、ムード、瞬きの強調、合図の光などを使って状態が表現されます。このサイトでは同じ顔素材を使い、公開可能なステータスをもとに背景のSomniaを描画します。</p>
+      <div class="note"><b>公開範囲</b> 公開する信号は内容を含まないステータスに限定しています。存在や稼働の気配は見える一方で、個別の会話や内部記憶は外へ出ない構成です。</div>
 
       <p class="article-end"><a class="text-link" href="index.html#observe">現在のSomniaを見る</a></p>
     </div>

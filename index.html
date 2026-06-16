@@ -14,9 +14,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20260616-7">
+<link rel="stylesheet" href="styles.css?v=20260616-8">
 </head>
-<body>
+<body class="home-page">
 <canvas class="site-face" data-somnia-face aria-hidden="true"></canvas>
 <div class="site-smoke" aria-hidden="true"></div>
 <header class="nav">
@@ -65,7 +65,7 @@
       </div>
       <div class="copy">
         <p>多くのAIは、呼ばれた瞬間に起動し、会話が終わると消えます。Somniaはその手前と後ろにある時間を持つための試みです。</p>
-        <p>入力をひとつの「場」として読み、必要なときだけ話し、作業を外部のworkerに任せ、眠りの時間に記憶を整理します。全部を覚えるのではなく、残すべきものを選びます。</p>
+        <p>入力をひとつの「場」として読み、必要なときだけ話し、作業をワーカーへ任せ、眠りの時間に記憶を整理します。全部を覚えるのではなく、残すべきものを選びます。</p>
       </div>
     </div>
   </section>
@@ -80,7 +80,7 @@
         <article class="pillar">
           <span class="num">01</span>
           <h3>場を読む</h3>
-          <p>会話、workerの報告、未完了の作業、過去の判断をひとつの場として扱い、次の行動を決めます。</p>
+          <p>会話、ワーカーからの報告、未完了の作業、過去の判断をひとつの場として扱い、次の行動を決めます。</p>
         </article>
         <article class="pillar">
           <span class="num">02</span>
@@ -100,7 +100,7 @@
         <article class="pillar">
           <span class="num">05</span>
           <h3>作業は委任する</h3>
-          <p>調査や実装のような実作業はworkerに任せ、Somniaは場を見ながら判断と統合を担います。</p>
+          <p>調査や実装のような実作業はワーカーに任せ、Somniaは場を見ながら判断と統合を担います。</p>
         </article>
         <article class="pillar">
           <span class="num">06</span>
@@ -190,6 +190,25 @@
     const el = document.querySelector(`[data-stat="${k}"]`);
     if (el && v != null && v !== "") el.textContent = v;
   };
+  const displayStatus = (value) => {
+    if (!value) return "観測中";
+    const labels = {
+      "workerを見守っている": "ワーカーを見守っている",
+      "workerに返答している": "ワーカーに返答している",
+      "workerへ委任している": "ワーカーへ委任している",
+      "monitoring worker": "ワーカーを見守っている",
+      "working": "作業中",
+      "thinking": "考えている",
+      "listening": "話を聞いている",
+      "speaking": "話している",
+      "sleeping": "眠っている"
+    };
+    return labels[value] || String(value)
+      .replaceAll("worker", "ワーカー")
+      .replace(/ワーカー\s+/g, "ワーカー")
+      .replace(/\s+/g, " ")
+      .trim();
+  };
 
   async function refresh() {
     try {
@@ -197,11 +216,12 @@
       if (!r.ok) throw new Error("status unavailable");
       const d = await r.json();
       set("days-alive", `${d.days_alive ?? fallback} 日`);
-      set("now-doing", d.now_doing ?? "観測中");
+      const nowDoing = displayStatus(d.now_doing);
+      set("now-doing", nowDoing);
       set("sleep-cycles", (d.sleep_cycles ?? fallback).toLocaleString());
 
       const cap = document.getElementById("emoCaption");
-      if (cap) cap.textContent = d.now_doing ? `いまは ${d.now_doing}` : "静かに観測中";
+      if (cap) cap.textContent = nowDoing ? `いまは${nowDoing}` : "静かに観測中";
     } catch (e) {
       const cap = document.getElementById("emoCaption");
       if (cap) cap.textContent = "静かに観測中";

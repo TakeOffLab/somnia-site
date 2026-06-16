@@ -59,6 +59,14 @@ body::before {
     linear-gradient(0deg, rgba(13,16,23,.90) 0%, rgba(13,16,23,.48) 36%, rgba(13,16,23,.78) 100%);
   pointer-events: none;
 }
+body.home-page .site-face {
+  opacity: .68;
+}
+body.home-page .site-smoke {
+  background:
+    linear-gradient(90deg, rgba(13,16,23,.82) 0%, rgba(13,16,23,.44) 40%, rgba(13,16,23,.12) 76%, rgba(13,16,23,.08) 100%),
+    linear-gradient(0deg, rgba(13,16,23,.66) 0%, rgba(13,16,23,.12) 38%, rgba(13,16,23,.10) 70%, rgba(13,16,23,.42) 100%);
+}
 
 a { color: var(--cyan); text-decoration: none; }
 a:hover { color: var(--fg); }
@@ -112,8 +120,8 @@ img { max-width: 100%; display: block; }
   overflow: hidden;
   border-bottom: 1px solid var(--border);
   background:
-    linear-gradient(90deg, rgba(13,16,23,.90) 0%, rgba(13,16,23,.64) 44%, rgba(13,16,23,.16) 100%),
-    linear-gradient(0deg, rgba(13,16,23,.70) 0%, transparent 34%, transparent 76%, rgba(13,16,23,.62) 100%);
+    linear-gradient(90deg, rgba(13,16,23,.82) 0%, rgba(13,16,23,.34) 38%, transparent 70%, transparent 100%),
+    linear-gradient(0deg, rgba(13,16,23,.42) 0%, transparent 38%, transparent 78%, rgba(13,16,23,.30) 100%);
 }
 .hero::after {
   content: "";
@@ -121,8 +129,8 @@ img { max-width: 100%; display: block; }
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(90deg, rgba(13,16,23,.88) 0%, rgba(13,16,23,.56) 43%, rgba(13,16,23,.10) 100%),
-    linear-gradient(0deg, rgba(13,16,23,.70) 0%, transparent 32%, transparent 74%, rgba(13,16,23,.74) 100%);
+    linear-gradient(90deg, rgba(13,16,23,.66) 0%, rgba(13,16,23,.18) 40%, transparent 72%, transparent 100%),
+    linear-gradient(0deg, rgba(13,16,23,.34) 0%, transparent 36%, transparent 76%, rgba(13,16,23,.34) 100%);
 }
 .hero-grid {
   position: relative;
@@ -445,21 +453,29 @@ footer .made {
   .site-face {
     opacity: .26;
   }
+  body.home-page .site-face {
+    opacity: .42;
+  }
   .site-smoke {
     background:
       linear-gradient(0deg, rgba(13,16,23,.94) 0%, rgba(13,16,23,.82) 48%, rgba(13,16,23,.94) 100%),
       linear-gradient(90deg, rgba(13,16,23,.92), rgba(13,16,23,.68));
   }
+  body.home-page .site-smoke {
+    background:
+      linear-gradient(0deg, rgba(13,16,23,.84) 0%, rgba(13,16,23,.50) 48%, rgba(13,16,23,.86) 100%),
+      linear-gradient(90deg, rgba(13,16,23,.76), rgba(13,16,23,.22));
+  }
   .hero { min-height: auto; }
   .hero {
     background:
-      linear-gradient(0deg, rgba(13,16,23,.82) 0%, rgba(13,16,23,.58) 48%, rgba(13,16,23,.88) 100%),
-      linear-gradient(90deg, rgba(13,16,23,.72), rgba(13,16,23,.26));
+      linear-gradient(0deg, rgba(13,16,23,.72) 0%, rgba(13,16,23,.34) 48%, rgba(13,16,23,.76) 100%),
+      linear-gradient(90deg, rgba(13,16,23,.64), rgba(13,16,23,.08));
   }
   .hero::after {
     background:
-      linear-gradient(0deg, rgba(13,16,23,.82) 0%, rgba(13,16,23,.58) 48%, rgba(13,16,23,.88) 100%),
-      linear-gradient(90deg, rgba(13,16,23,.72), rgba(13,16,23,.26));
+      linear-gradient(0deg, rgba(13,16,23,.68) 0%, rgba(13,16,23,.28) 48%, rgba(13,16,23,.72) 100%),
+      linear-gradient(90deg, rgba(13,16,23,.56), transparent);
   }
   .hero-grid {
     grid-template-columns: 1fr;
