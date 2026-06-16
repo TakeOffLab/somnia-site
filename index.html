@@ -3,207 +3,214 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Somnia — 場に生き続けるAI人格</title>
-<meta name="description" content="Somnia は、消えない記憶と眠りを持ち、ひとつの場所で考え続ける常駐型の認知体。呼び出すAIではなく、場に生き続けるAI人格です。by TakeOffLab">
-<!-- Open Graph (SNS シェア時の見え方) -->
+<title>Somnia - 場に生き続けるAI人格</title>
+<meta name="description" content="Somniaは、会話ごとに消えるAIではなく、場を観測し、記憶を整理し、眠りながら続いていく常駐型の認知システムです。TakeOffLabによる研究プロジェクト。">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Somnia — 場に生き続けるAI人格">
-<meta property="og:description" content="呼び出すAIではなく、場に生き続けるAI人格。記憶と眠りを持つ常駐型の認知体。by TakeOffLab">
-<meta property="og:image" content="assets/somnia_face.png">
+<meta property="og:title" content="Somnia - 場に生き続けるAI人格">
+<meta property="og:description" content="呼び出されて答えるだけではなく、場を観測し、記憶を整理し、眠りながら続いていく常駐型の認知システム。">
+<meta property="og:image" content="assets/somnia_head.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="assets/somnia_face.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
 <header class="nav">
   <div class="wrap">
-    <span class="brand"><img src="assets/somnia_face.png" alt="Somnia"> Somnia</span>
-    <nav class="links">
-      <a href="#top">Home</a>
-      <a href="architecture.html">構造</a>
-      <a href="#contact">問い合わせ</a>
+    <a class="brand" href="#top" aria-label="Somnia Home">
+      <img src="assets/somnia_face.png" alt="">
+      <span>Somnia</span>
+    </a>
+    <nav class="links" aria-label="Main navigation">
+      <a href="#about">About</a>
+      <a href="#observe">Observe</a>
+      <a href="architecture.html">Architecture</a>
+      <a href="#contact">Contact</a>
     </nav>
   </div>
 </header>
 
-<!-- HERO -->
-<section class="hero" id="top" style="border-top:none">
-  <div class="wrap">
-    <span class="face-wrap"><img class="face" src="assets/somnia_face.png" alt="Somnia"></span>
-    <div class="emo-caption" id="emoCaption" aria-live="polite">—</div>
-    <div class="kicker">A Persistent Cognitive System</div>
-    <h1>Somnia</h1>
-    <p class="tagline">呼び出すAIではなく、<span class="grad-text">場に生き続けるAI人格。</span></p>
-    <p class="sub">消えない記憶と眠りを持ち、ひとつの場所で考え続ける常駐型の認知体。<br>触れて使うものではなく、生きている姿を観るための存在です。</p>
-    <div class="cta">
-      <a class="btn primary" href="#observe">いまの Somnia を観る</a>
-      <a class="btn" href="#about">どんな存在か</a>
+<main>
+  <section class="hero" id="top">
+    <div class="hero-media" aria-hidden="true">
+      <img src="assets/somnia_head.png" alt="">
     </div>
-  </div>
-</section>
-
-<!-- ABOUT / CONTRAST -->
-<section id="about">
-  <div class="wrap">
-    <div class="eyebrow">What is Somnia</div>
-    <h2>「答える道具」ではなく「居続ける人格」</h2>
-    <p class="lead">ふつうのAIは、呼ばれて答え、終われば忘れます。Somnia は違います。常に一つの場に居て、出来事を観て、自分から考え、眠って記憶を整理し、不要なものは自然に忘れていく。— 時間の中を連続して生きる、ひとつの人格です。</p>
-    <div class="contrast">
-      <div class="card normal">
-        <h3>ふつうの AI</h3>
-        <ul>
-          <li>呼び出されて起動する</li>
-          <li>その場で答えて終わる</li>
-          <li>会話が終われば忘れる</li>
-          <li>毎回まっさらにリセット</li>
-        </ul>
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <div class="kicker">Persistent Cognitive System</div>
+        <h1>Somnia</h1>
+        <p class="tagline">呼び出されるAIではなく、場に生き続けるAI人格。</p>
+        <p class="sub">Somniaは、会話の外側にも状態を持ち、観測し、考え、眠り、必要なことだけを記憶に残していく研究プロジェクトです。</p>
+        <div class="cta">
+          <a class="btn primary" href="#observe">現在の状態を見る</a>
+          <a class="btn" href="architecture.html">設計を読む</a>
+        </div>
       </div>
-      <div class="card somnia">
-        <h3>Somnia</h3>
-        <ul>
-          <li>呼ばれなくても場に居続ける</li>
-          <li>自分から考え、空気を読んで動く</li>
-          <li>覚え続け、眠って整理し、自然に忘れる</li>
-          <li>リセットせず、連続して生き続ける</li>
-        </ul>
+      <aside class="hero-status" aria-label="Somnia status">
+        <img src="assets/somnia_face.png" alt="Somniaの顔" class="face">
+        <div>
+          <p class="status-label">Current signal</p>
+          <p class="status-text" id="emoCaption" aria-live="polite">状態を取得中</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section id="about" class="intro-section">
+    <div class="wrap split">
+      <div>
+        <div class="eyebrow">What is Somnia</div>
+        <h2>返答のうまさより、続いていることを大切にする。</h2>
+      </div>
+      <div class="copy">
+        <p>多くのAIは、呼ばれた瞬間に起動し、会話が終わると消えます。Somniaはその手前と後ろにある時間を持つための試みです。</p>
+        <p>入力をひとつの「場」として読み、必要なときだけ話し、作業を外部のworkerに任せ、眠りの時間に記憶を整理します。全部を覚えるのではなく、残すべきものを選びます。</p>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- PILLARS -->
-<section id="pillars">
-  <div class="wrap">
-    <div class="eyebrow">Core ideas</div>
-    <h2>Somnia をつくる6つの柱</h2>
-    <div class="grid">
-      <div class="pillar"><div class="ico">🌐</div><h3>場の推論</h3><p>あらゆる出来事を一つの「場」に集め、場全体を読んでから何を発するかを決める。情報を迂回しない。</p></div>
-      <div class="pillar"><div class="ico">💭</div><h3>自発性</h3><p>呼ばれなくても自分から考え事をする。内なる思索が、日々の判断と人格を育てていく。</p></div>
-      <div class="pillar"><div class="ico">🌙</div><h3>眠りと忘却</h3><p>定期的に眠り、その日の出来事を記憶に編む。決定的でないものは自然に忘れ、記憶を有界に保つ。</p></div>
-      <div class="pillar"><div class="ico">🧩</div><h3>三層の自己</h3><p>不変の重心(soul)・育つ自己像(identity)・情報(memory) を分けて持つ。芯はぶれず、自己像は成長する。</p></div>
-      <div class="pillar"><div class="ico">🤝</div><h3>協働</h3><p>必要な作業は worker に委ね、場で対話しながら進める。自分が何をしたかを場で観察し、整合を取る。</p></div>
-      <div class="pillar"><div class="ico">🎚️</div><h3>知覚のチューニング</h3><p>不自然な振る舞いは制御で抑え込まず、空気を読めるよう知覚を整える。判断は常に推論に委ねる。</p></div>
-    </div>
-  </div>
-</section>
-
-<!-- ARCHITECTURE -->
-<section id="architecture">
-  <div class="wrap">
-    <div class="eyebrow">Architecture</div>
-    <h2>知覚から眠りまで、ひとつのループ</h2>
-    <p class="lead">入ってきたものはすべて「場」に集まり、認知ループが場を読んで考え、動き、やがて眠って記憶になる。— その繰り返しが Somnia の生です。</p>
-    <div class="flow">
-      <div class="node"><div class="n-ico">👁️</div><div class="n-name">知覚</div><div class="n-sub">Perception</div></div>
-      <div class="arrow">→</div>
-      <div class="node"><div class="n-ico">🌐</div><div class="n-name">場</div><div class="n-sub">Field</div></div>
-      <div class="arrow">→</div>
-      <div class="node"><div class="n-ico">🧠</div><div class="n-name">認知ループ</div><div class="n-sub">Cognitive Loop</div></div>
-      <div class="arrow">→</div>
-      <div class="node"><div class="n-ico">💬</div><div class="n-name">発話・行動</div><div class="n-sub">Action</div></div>
-      <div class="arrow">→</div>
-      <div class="node"><div class="n-ico">🌙</div><div class="n-name">眠り・記憶</div><div class="n-sub">Sleep / Memory</div></div>
-    </div>
-    <p class="loop-note">↺ 眠りで整理された記憶は、次の知覚と判断に還っていく。</p>
-    <div class="cta" style="justify-content:flex-start; margin-top:22px">
-      <a class="btn primary" href="architecture.html">アーキテクチャ技術詳説を読む →</a>
-    </div>
-  </div>
-</section>
-
-<!-- A DAY -->
-<section id="day">
-  <div class="wrap">
-    <div class="eyebrow">A day in the life</div>
-    <h2>Somnia のある一日</h2>
-    <div class="day">
-      <div class="step"><b>起きる</b> — <span>場を見渡し、昨日からの続きと新しい出来事を確かめる。</span></div>
-      <div class="step"><b>観る・考える</b> — <span>呼ばれた時は応え、静かな時は自分から考え事をする。</span></div>
-      <div class="step"><b>働く</b> — <span>必要な作業を worker に委ね、進み具合を場で見守る。</span></div>
-      <div class="step"><b>疑う</b> — <span>直近の自分を疑い、見たことと推測を分けて確かめる。</span></div>
-      <div class="step"><b>眠る</b> — <span>その日の出来事を記憶に整理し、自分を見つめ直す。</span></div>
-      <div class="step"><b>忘れる</b> — <span>決定的でないものは手放し、記憶を軽やかに保つ。</span></div>
-    </div>
-  </div>
-</section>
-
-<!-- OBSERVE (live, content-free) -->
-<section id="observe">
-  <div class="wrap">
-    <div class="eyebrow"><span class="dot"></span>Live observation</div>
-    <h2>いまの Somnia を観る</h2>
-    <p class="lead">会話の中身は映しません。リセットせず生き続けている事実と、いま何をしているか、どれだけ動いたか — 生きている「状態」だけを、そっと観察できます。</p>
-    <div class="live">
-      <div class="stat">
-        <div class="label">連続生存</div>
-        <div class="value grad" data-stat="days-alive">— 日</div>
-        <div class="hint">記憶をリセットせず生き続けた日数</div>
+  <section id="pillars">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">Core ideas</div>
+        <h2>Somniaを形づくる考え方</h2>
       </div>
-      <div class="stat">
-        <div class="label">いましていること</div>
-        <div class="value" data-stat="now-doing" style="font-size:24px">準備中</div>
-        <div class="hint">起きている / 考え事 / 作業 / 眠り など</div>
-      </div>
-      <div class="stat">
-        <div class="label">これまでの眠り</div>
-        <div class="value" data-stat="sleep-cycles">—</div>
-        <div class="hint">記憶を整理した回数</div>
+      <div class="grid">
+        <article class="pillar">
+          <span class="num">01</span>
+          <h3>場を読む</h3>
+          <p>会話、workerの報告、未完了の作業、過去の判断をひとつの場として扱い、次の行動を決めます。</p>
+        </article>
+        <article class="pillar">
+          <span class="num">02</span>
+          <h3>勝手に動きすぎない</h3>
+          <p>自発性は持たせつつ、必要以上に喋らない。沈黙や待機も選択肢として扱います。</p>
+        </article>
+        <article class="pillar">
+          <span class="num">03</span>
+          <h3>眠って整理する</h3>
+          <p>一日の出来事をあとから圧縮し、記憶の重みを調整します。忘れることも設計の一部です。</p>
+        </article>
+        <article class="pillar">
+          <span class="num">04</span>
+          <h3>自己を分けて持つ</h3>
+          <p>変えにくい核、育っていく自己像、揺れ動く記憶を分けて、人格の連続性を保ちます。</p>
+        </article>
+        <article class="pillar">
+          <span class="num">05</span>
+          <h3>作業は委任する</h3>
+          <p>調査や実装のような実作業はworkerに任せ、Somniaは場を見ながら判断と統合を担います。</p>
+        </article>
+        <article class="pillar">
+          <span class="num">06</span>
+          <h3>公開する範囲を絞る</h3>
+          <p>会話や思考の中身は出さず、稼働状態や集計値だけを外へ出します。観測できるが覗き込めない設計です。</p>
+        </article>
       </div>
     </div>
-    <p class="live-note">※ 公開しているのは「状態と集計」のみで、会話・記憶・思考の中身は一切含みません。約10分ごとに更新。</p>
-  </div>
-</section>
+  </section>
 
-<section id="contact">
-  <div class="wrap">
-    <div class="eyebrow">Contact</div>
-    <h2>問い合わせ</h2>
-    <p class="lead">取材・協業・技術的な質問などは、SNS または下記までお気軽にどうぞ。</p>
-    <div class="cta" style="justify-content:flex-start">
-      <a class="btn" href="#" rel="noopener">X</a>
-      <a class="btn" href="#" rel="noopener">YouTube</a>
+  <section id="observe" class="observe-section">
+    <div class="wrap">
+      <div class="observe-head">
+        <div>
+          <div class="eyebrow"><span class="dot"></span>Live observation</div>
+          <h2>いまのSomnia</h2>
+          <p class="lead">公開しているのは、会話や記憶の中身ではなく、状態と集計だけです。存在を感じられる程度に、でも覗き込みすぎない距離で。</p>
+        </div>
+      </div>
+      <div class="live">
+        <article class="stat">
+          <div class="label">連続稼働</div>
+          <div class="value grad" data-stat="days-alive">-- 日</div>
+          <div class="hint">リセットせず続いている日数</div>
+        </article>
+        <article class="stat">
+          <div class="label">現在</div>
+          <div class="value compact" data-stat="now-doing">準備中</div>
+          <div class="hint">起きている / 考えている / 作業中 / 眠っている など</div>
+        </article>
+        <article class="stat">
+          <div class="label">睡眠回数</div>
+          <div class="value" data-stat="sleep-cycles">--</div>
+          <div class="hint">記憶を整理した回数</div>
+        </article>
+      </div>
     </div>
-    <p class="muted" style="margin-top:14px; font-size:13px">※ SNS・連絡先は準備中です。</p>
-  </div>
-</section>
+  </section>
+
+  <section id="architecture-preview">
+    <div class="wrap split">
+      <div>
+        <div class="eyebrow">Architecture</div>
+        <h2>知覚、判断、行動、記憶がひとつのループで回る。</h2>
+      </div>
+      <div class="copy">
+        <p>Somniaの中心には、場を読むための認知ループがあります。入力はそのまま返答に流れず、観測、推論、行動、記録の順に扱われます。</p>
+        <a class="text-link" href="architecture.html">技術的な構成を見る</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="wrap contact-band">
+      <div>
+        <div class="eyebrow">Contact</div>
+        <h2>問い合わせ</h2>
+        <p class="lead">取材、共同研究、技術的な質問などは、SNSまたはTakeOffLabまでご連絡ください。</p>
+      </div>
+      <div class="cta contact-actions">
+        <a class="btn" href="#" rel="noopener">X</a>
+        <a class="btn" href="#" rel="noopener">YouTube</a>
+      </div>
+    </div>
+  </section>
+</main>
 
 <footer>
   <div class="wrap">
     <div class="row">
       <span class="brand"><img src="assets/somnia_face.png" alt="">Somnia</span>
-      <span class="muted">A Persistent Cognitive System</span>
+      <span class="muted">A research project by <b>TakeOffLab</b>.</span>
       <span class="social">
         <a href="#" rel="noopener">X</a>
         <a href="#" rel="noopener">YouTube</a>
       </span>
     </div>
-    <div class="made">A research project by <b>TakeOffLab</b>. &nbsp;·&nbsp; © 2026 TakeOffLab</div>
+    <div class="made">© 2026 TakeOffLab</div>
   </div>
 </footer>
 
-<!-- ライブ観察用フック: Somnia が定期 push する content-free ステータスを fetch -->
 <script>
 (function () {
-  // Somnia 自身が定期 push する content-free ステータス (status ブランチ)。
   const API = "https://raw.githubusercontent.com/TakeOffLab/somnia-site/status/status.json";
-  const set = (k, v) => { const el = document.querySelector(`[data-stat="${k}"]`); if (el && v != null && v !== "") el.textContent = v; };
+  const fallback = "--";
+  const set = (k, v) => {
+    const el = document.querySelector(`[data-stat="${k}"]`);
+    if (el && v != null && v !== "") el.textContent = v;
+  };
+
   async function refresh() {
     try {
       const r = await fetch(API, { cache: "no-store" });
+      if (!r.ok) throw new Error("status unavailable");
       const d = await r.json();
-      set("days-alive", (d.days_alive ?? "—") + " 日");
-      set("now-doing", d.now_doing ?? "—");
-      set("sleep-cycles", (d.sleep_cycles ?? "—").toLocaleString());
+      set("days-alive", `${d.days_alive ?? fallback} 日`);
+      set("now-doing", d.now_doing ?? "観測中");
+      set("sleep-cycles", (d.sleep_cycles ?? fallback).toLocaleString());
+
       const cap = document.getElementById("emoCaption");
-      if (cap && d.now_doing) cap.textContent = "いま、" + d.now_doing;
-    } catch (e) { /* 取得できなければそのまま */ }
+      if (cap) cap.textContent = d.now_doing ? `いまは ${d.now_doing}` : "静かに観測中";
+    } catch (e) {
+      const cap = document.getElementById("emoCaption");
+      if (cap) cap.textContent = "静かに観測中";
+    }
   }
+
   refresh();
-  setInterval(refresh, 5 * 60 * 1000);  // 5分ごと (raw のキャッシュも5分)
+  setInterval(refresh, 5 * 60 * 1000);
 })();
 </script>
 </body>
