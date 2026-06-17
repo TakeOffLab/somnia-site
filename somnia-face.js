@@ -1,4 +1,6 @@
 (() => {
+  const FACE_DEBUG = new URLSearchParams(window.location.search).has("face-debug");
+  if (FACE_DEBUG) window.somniaFaceScriptLoaded = true;
   const STATUS_API = "https://raw.githubusercontent.com/TakeOffLab/somnia-site/status/status.json";
   const ASSET_BASE = "assets/face/base/";
 
@@ -161,6 +163,7 @@
       this.saccade = new SaccadePlanner();
       this.images = {};
       this.eyeLayers = {};
+      this.moodEyeLayers = {};
       this.startedAt = performance.now();
       this.nextBlinkT = null;
       this.blinkUntilT = 0;
@@ -186,6 +189,8 @@
       })));
       this.eyeLayers.leftEye = this.createEyeLayer(this.images.leftEye);
       this.eyeLayers.rightEye = this.createEyeLayer(this.images.rightEye);
+      this.moodEyeLayers.leftEye = this.createMoodEyeLayers(this.eyeLayers.leftEye, "leftEye");
+      this.moodEyeLayers.rightEye = this.createMoodEyeLayers(this.eyeLayers.rightEye, "rightEye");
       this.resize();
     }
 
@@ -197,6 +202,10 @@
       ctx.drawImage(img, 0, 0);
       const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const data = frame.data;
+      let minX = canvas.width;
+      let minY = canvas.height;
+      let maxX = -1;
+      let maxY = -1;
       for (let i = 0; i < data.length; i += 4) {
         const r = data[i] / 255;
         const g = data[i + 1] / 255;
@@ -217,12 +226,105 @@
         const isCyan = h >= 0.46 && h <= 0.58 && s > 0.22 && v > 0.35;
         const isPurple = h >= 0.68 && h <= 0.84 && s > 0.22 && v > 0.35;
         if (isCyan || isPurple) {
-          data[i + 3] = Math.max(0, Math.min(255, 255 * s * v * 1.9));
+          const alpha = Math.max(0, Math.min(255, 255 * s * v * 1.9));
+          data[i + 3] = alpha;
+          if (alpha > 8) {
+            const p = i / 4;
+            const x = p % canvas.width;
+            const y = Math.floor(p / canvas.width);
+            minX = Math.min(minX, x);
+            minY = Math.min(minY, y);
+            maxX = Math.max(maxX, x);
+            maxY = Math.max(maxY, y);
+          }
         } else {
           data[i + 3] = 0;
         }
       }
       ctx.putImageData(frame, 0, 0);
+      canvas.alphaBox = maxX >= 0
+        ? { x: minX, y: minY, w: maxX - minX + 1, h: maxY - minY + 1 }
+        : { x: 0, y: 0, w: canvas.width, h: canvas.height };
+      return canvas;
+    }
+
+    createMoodEyeLayers(layer, key) {
+      const moods = ["calm", "content", "curious", "focused", "alert", "anxious", "weary", "happy"];
+      const layers = {};
+      const normal = this.cloneCanvas(layer);
+      normal.alphaBox = layer.alphaBox;
+      for (const mood of moods) {
+        const shape = ["focused", "anxious", "weary", "happy"].includes(mood) ? mood : "calm";
+        layers[mood] = shape === "calm" ? normal : this.shapeEyeLayer(layer, key, shape);
+      }
+      return layers;
+    }
+
+    cloneCanvas(source) {
+      const canvas = document.createElement("canvas");
+      canvas.width = source.width;
+      canvas.height = source.height;
+      canvas.getContext("2d").drawImage(source, 0, 0);
+      return canvas;
+    }
+
+    shapeEyeLayer(layer, key, mood) {
+      const canvas = this.cloneCanvas(layer);
+      canvas.alphaBox = layer.alphaBox;
+      const ctx = canvas.getContext("2d");
+      const box = layer.alphaBox || { x: 0, y: 0, w: layer.width, h: layer.height };
+      const le = box.x;
+      const te = box.y;
+      const ri = box.x + box.w;
+      const bo = box.y + box.h;
+      const w = box.w;
+      const h = box.h;
+      const pad = Math.max(4, Math.round(layer.width * 0.005));
+      const outer = key === "leftEye" ? "left" : "right";
+
+      ctx.save();
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.beginPath();
+      if (mood === "focused") {
+        const inner = te + h * 0.30;
+        const outerY = te + h * 0.18;
+        if (outer === "left") {
+          ctx.moveTo(le - pad, te - pad);
+          ctx.lineTo(ri + pad, te - pad);
+          ctx.lineTo(ri + pad, inner);
+          ctx.lineTo(le - pad, outerY);
+        } else {
+          ctx.moveTo(le - pad, te - pad);
+          ctx.lineTo(ri + pad, te - pad);
+          ctx.lineTo(ri + pad, outerY);
+          ctx.lineTo(le - pad, inner);
+        }
+      } else if (mood === "weary") {
+        ctx.rect(le - pad, te - pad, w + pad * 2, h * 0.45 + pad);
+      } else if (mood === "anxious") {
+        const hi = te + h * 0.08;
+        const lo = te + h * 0.42;
+        if (outer === "left") {
+          ctx.moveTo(le - pad, te - pad);
+          ctx.lineTo(ri + pad, te - pad);
+          ctx.lineTo(ri + pad, hi);
+          ctx.lineTo(le - pad, lo);
+        } else {
+          ctx.moveTo(le - pad, te - pad);
+          ctx.lineTo(ri + pad, te - pad);
+          ctx.lineTo(ri + pad, lo);
+          ctx.lineTo(le - pad, hi);
+        }
+      } else if (mood === "happy") {
+        const ex = le - w * 0.15;
+        const ey = te + h * 0.52;
+        const ew = w * 1.30;
+        const eh = h * 1.38;
+        ctx.ellipse(ex + ew / 2, ey + eh / 2, ew / 2, eh / 2, 0, 0, Math.PI * 2);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
       return canvas;
     }
 
@@ -260,8 +362,26 @@
         requestAnimationFrame(tick);
       };
       requestAnimationFrame(tick);
-      this.refresh();
-      setInterval(() => this.refresh(), 5 * 60 * 1000);
+      const debugState = this.debugStateFromLocation();
+      if (debugState) {
+        this.setState(debugState);
+      } else {
+        this.refresh();
+        setInterval(() => this.refresh(), 5 * 60 * 1000);
+      }
+    }
+
+    debugStateFromLocation() {
+      const params = new URLSearchParams(window.location.search);
+      if (!params.has("face-debug")) return null;
+      if (!params.has("face-primary") && !params.has("face-mood")) return null;
+      return {
+        primary: params.get("face-primary") || "idle",
+        energy: params.get("face-energy") || "normal",
+        mood: params.get("face-mood") || "calm",
+        effects: params.get("face-effects") ? params.get("face-effects").split(",").filter(Boolean) : [],
+        beacon: params.get("face-beacon") === "1",
+      };
     }
 
     async refresh() {
@@ -400,7 +520,7 @@
     }
 
     eyePlacement(key, faceRect) {
-      const img = this.eyeLayers[key] || this.images[key];
+      const img = this.eyeLayerFor(key);
       const isLeft = key === "leftEye";
       const targetW = faceRect.w * 0.49;
       const sourceW = img.naturalWidth || img.width;
@@ -411,9 +531,14 @@
       return { x: cx - targetW / 2, y: cy - targetH / 2, w: targetW, h: targetH };
     }
 
+    eyeLayerFor(key) {
+      const mood = this.state.mood || "calm";
+      return this.moodEyeLayers[key]?.[mood] || this.moodEyeLayers[key]?.calm || this.eyeLayers[key] || this.images[key];
+    }
+
     drawEye(key, dx, dy, squash, scale, glow, faceRect) {
       const ctx = this.ctx;
-      const img = this.eyeLayers[key] || this.images[key];
+      const img = this.eyeLayerFor(key);
       const p = this.eyePlacement(key, faceRect);
       const cx = p.x + p.w / 2 + dx;
       const cy = p.y + p.h / 2 + dy;
@@ -430,57 +555,26 @@
       ctx.restore();
 
       ctx.save();
-      this.applyMoodClip(ctx, key, x, y, dw, dh);
       ctx.globalAlpha = 0.94;
       ctx.filter = `brightness(${Math.max(0.7, 1.02 + glow * 0.12)})`;
       ctx.drawImage(img, x, y, dw, dh);
       ctx.restore();
     }
 
-    applyMoodClip(ctx, key, x, y, w, h) {
-      const mood = this.state.mood;
-      if (!["focused", "anxious", "happy", "weary"].includes(mood)) return;
-
-      ctx.beginPath();
-      if (mood === "happy") {
-        ctx.rect(x, y, w, h * 0.72);
-      } else if (mood === "focused") {
-        ctx.rect(x, y + h * 0.2, w, h * 0.8);
-      } else if (mood === "weary") {
-        ctx.rect(x, y + h * 0.35, w, h * 0.65);
-      } else if (mood === "anxious") {
-        const outerHigh = key === "leftEye" ? "right" : "left";
-        if (outerHigh === "left") {
-          ctx.moveTo(x, y + h * 0.08);
-          ctx.lineTo(x + w, y + h * 0.38);
-          ctx.lineTo(x + w, y + h);
-          ctx.lineTo(x, y + h);
-        } else {
-          ctx.moveTo(x, y + h * 0.38);
-          ctx.lineTo(x + w, y + h * 0.08);
-          ctx.lineTo(x + w, y + h);
-          ctx.lineTo(x, y + h);
-        }
-      }
-      ctx.closePath();
-      ctx.clip();
-    }
-
     drawSleeping(t, faceRect) {
       const ctx = this.ctx;
       const w = faceRect.w;
       const h = faceRect.h;
-      const y = faceRect.y + h * (0.56 + Math.sin(t * 1.4) * 0.005);
+      const y = faceRect.y + h * 0.59 + Math.sin(t * 0.9) * h * 0.004;
       ctx.save();
-      ctx.strokeStyle = "rgba(142, 229, 255, .78)";
+      ctx.strokeStyle = "rgba(30, 55, 105, .82)";
       ctx.lineWidth = Math.max(4, w * 0.006);
       ctx.lineCap = "round";
-      ctx.shadowColor = "rgba(92, 220, 255, .52)";
-      ctx.shadowBlur = Math.max(12, w * 0.018);
-      for (const x of [faceRect.x + w * 0.31, faceRect.x + w * 0.78]) {
+      ctx.shadowColor = "rgba(92, 220, 255, .28)";
+      ctx.shadowBlur = Math.max(8, w * 0.012);
+      for (const x of [faceRect.x + w * 0.255, faceRect.x + w * 0.775]) {
         ctx.beginPath();
-        ctx.moveTo(x - w * 0.07, y);
-        ctx.quadraticCurveTo(x, y + h * 0.035, x + w * 0.07, y);
+        ctx.ellipse(x, y, w * 0.105, h * 0.026, 0, Math.PI * 190 / 180, Math.PI * 350 / 180);
         ctx.stroke();
       }
       ctx.restore();
@@ -488,11 +582,22 @@
   }
 
   async function boot() {
-    const canvas = document.querySelector("[data-somnia-face]");
-    if (!canvas) return;
-    const face = new SomniaFace(canvas);
-    await face.load();
-    face.start();
+    try {
+      if (FACE_DEBUG) window.somniaFaceBootCalled = true;
+      const canvas = document.querySelector("[data-somnia-face]");
+      if (!canvas) return;
+      const face = new SomniaFace(canvas);
+      await face.load();
+      if (FACE_DEBUG) {
+        window.somniaFace = face;
+      }
+      face.start();
+    } catch (error) {
+      if (FACE_DEBUG) {
+        window.somniaFaceBootError = String(error?.stack || error);
+      }
+      console.error("Somnia face failed to start", error);
+    }
   }
 
   if (document.readyState === "loading") {
