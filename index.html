@@ -168,10 +168,10 @@
   const displayStatus = (value) => {
     if (!value) return "観測中";
     const labels = {
-      "workerを見守っている": "ワーカー見守り中",
-      "workerに返答している": "ワーカーに返答している",
-      "workerへ委任している": "ワーカーへ委任している",
-      "monitoring worker": "ワーカー見守り中",
+      "workerを見守っている": "作業中",
+      "workerに返答している": "作業中",
+      "workerへ委任している": "作業中",
+      "monitoring worker": "作業中",
       "working": "作業中",
       "thinking": "考えている",
       "listening": "話を聞いている",
@@ -179,11 +179,14 @@
       "sleeping": "眠っている"
     };
     const normalized = labels[value] || String(value)
-      .replaceAll("worker", "ワーカー")
-      .replace(/ワーカー\s+/g, "ワーカー")
+      .replace(/worker\s*を見守っている/g, "作業中")
+      .replace(/worker\s*に返答している/g, "作業中")
+      .replace(/worker\s*へ委任している/g, "作業中")
+      .replace(/monitoring\s+worker/g, "作業中")
+      .replaceAll("worker", "作業")
       .replace(/\s+/g, " ")
       .trim();
-    return normalized === "ワーカーを見守っている" ? "ワーカー見守り中" : normalized;
+    return normalized === "作業を見守っている" ? "作業中" : normalized;
   };
 
   async function refresh() {
