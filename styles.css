@@ -25,7 +25,7 @@ body {
   line-height: 1.8;
   -webkit-font-smoothing: antialiased;
 }
-body > *:not(.site-face):not(.site-smoke) {
+body > *:not(.site-face):not(.site-smoke):not(.face-live-badge) {
   position: relative;
   z-index: 1;
 }
@@ -133,7 +133,7 @@ img { max-width: 100%; display: block; }
     linear-gradient(0deg, rgba(13,16,23,.34) 0%, transparent 36%, transparent 76%, rgba(13,16,23,.34) 100%);
 }
 .face-live-badge {
-  position: absolute;
+  position: fixed;
   z-index: 1;
   right: clamp(26px, 7vw, 92px);
   top: clamp(92px, 18vh, 170px);
