@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Architecture - Somniaの構造</title>
-<meta name="description" content="Somniaの構成。イベントログ、場の観測、認知ループ、記憶と睡眠、ワーカー連携、公開ステータスについて。">
+<title>しくみ - Somnia</title>
+<meta name="description" content="Somniaのしくみ。出来事の記録、場の観測、認知ループ、起きている間の記憶、睡眠、忘却、ワーカーとの連携を紹介します。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://takeofflab.github.io/somnia-site/architecture.html">
-<meta property="og:title" content="Somnia Architecture">
-<meta property="og:description" content="場を読み、判断し、行動し、眠って記憶を整理する常駐型の自立型AIの構造。">
+<meta property="og:title" content="Somniaのしくみ">
+<meta property="og:description" content="場を読み、考え、行動し、眠って記憶を整理する自立型AIのしくみ。">
 <meta property="og:image" content="https://takeofflab.github.io/somnia-site/assets/og-somnia.png">
 <meta property="og:image:secure_url" content="https://takeofflab.github.io/somnia-site/assets/og-somnia.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Somnia - 場に生き続ける自立型AI">
+<meta property="og:image:alt" content="Somnia - 場を読み、考え続ける自立型AI">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@SomniaAI">
 <meta name="twitter:image" content="https://takeofflab.github.io/somnia-site/assets/og-somnia.png">
@@ -26,15 +26,15 @@
 <body class="architecture-page">
 <canvas class="site-face" data-somnia-face aria-hidden="true"></canvas>
 <div class="site-smoke" aria-hidden="true"></div>
-<div class="face-live-badge" aria-label="Somnia live background"><span></span>LIVE</div>
+<div class="face-live-badge" aria-label="背景に表示しているSomniaの現在の表情"><span></span>LIVE</div>
 <header class="nav">
   <div class="wrap">
-    <a class="brand" href="index.html#top" aria-label="Somnia Home"><img src="assets/somnia_face.png" alt=""><span>Somnia</span></a>
-    <nav class="links" aria-label="Main navigation">
-      <a href="index.html#top">Main</a>
-      <a href="concept.html">Concept</a>
-      <a href="architecture.html">Architecture</a>
-      <a href="contact.html">Contact</a>
+    <a class="brand" href="index.html#top" aria-label="Somnia ホーム"><img src="assets/somnia_face.png" alt=""><span>Somnia</span></a>
+    <nav class="links" aria-label="メインメニュー">
+      <a href="index.html#top">ホーム</a>
+      <a href="concept.html">理念</a>
+      <a href="architecture.html">しくみ</a>
+      <a href="contact.html">問い合わせ</a>
     </nav>
   </div>
 </header>
@@ -42,10 +42,10 @@
 <main>
   <section class="page-hero">
     <div class="wrap prose">
-      <a class="back" href="index.html#top">Homeへ戻る</a>
-      <div class="kicker">Architecture</div>
-      <h1>Somniaの構造</h1>
-      <p class="sub">Somniaは、常駐プロセスとしてFieldを観測し、記憶を参照し、必要な行動を選択する認知システムです。このページでは、理念を支える現在の実装に沿って主要な構成を整理します。</p>
+      <a class="back" href="index.html#top">ホームへ戻る</a>
+      <div class="kicker">今動いているしくみ</div>
+      <h1>Somniaのしくみ</h1>
+      <p class="sub">Somniaは、場を観測し、記憶を思い出し、次の行動を選び続ける常駐型の認知システムです。このページでは、今動いているしくみを、役割が伝わる言葉で紹介します。</p>
     </div>
   </section>
 
@@ -54,38 +54,38 @@
       <nav class="toc" aria-label="目次">
         <b>目次</b>
         <ol>
-          <li><a href="#overview">概要</a></li>
+          <li><a href="#overview">全体像</a></li>
           <li><a href="#loop">認知ループ</a></li>
           <li><a href="#field">場</a></li>
           <li><a href="#memory">記憶と睡眠</a></li>
-          <li><a href="#self">三層の自己</a></li>
-          <li><a href="#workers">ワーカー連携</a></li>
+          <li><a href="#self">自分を支える記録</a></li>
+          <li><a href="#workers">作業の委任</a></li>
         </ol>
       </nav>
 
-      <h2 id="overview">概要</h2>
-      <p>Somniaは、Discordでの会話、ワーカーからの報告、内部イベント、時刻信号などを継続的に取り込み、イベントログへ保存します。現在の状態はそのログから復元され、Field、記憶、未完了の課題、直近の判断をもとに次の行動が選ばれます。</p>
-      <p>主な構成は、入力を観測する層、すべての出来事を残すイベントログ、状態を復元する層、判断材料をまとめる場の観測層、行動を選ぶ認知ループ、記憶を整理するスリープ、外部作業を扱うツール層です。</p>
+      <h2 id="overview">全体像</h2>
+      <p>Somniaは、DiscordやLINEでの会話、ワーカーからの報告、自分の内側で起きたこと、時刻の変化などを継続して受け取り、出来事の記録へ残します。そこから今の状態を組み立て、場、記憶、やりかけの用事、直近の判断をもとに、次の行動を選びます。</p>
+      <p>中心にあるのは、入力を受け取る観測、出来事の記録、今の状態の組み立て、判断材料をまとめる場、行動を選ぶ認知ループ、記憶を整える睡眠、外の作業につながる道具です。</p>
       <div class="grid compact-grid">
         <article class="pillar">
-          <span class="num">ログ</span>
-          <h3>全イベントの記録</h3>
-          <p>会話、内部信号、ツールの結果、ワーカーの報告を時系列のログとして保存します。</p>
+          <span class="num">記録</span>
+          <h3>出来事を残す</h3>
+          <p>会話、自分の状態、道具の結果、ワーカーの報告を、起きた順に保存します。</p>
         </article>
         <article class="pillar">
-          <span class="num">ステート</span>
-          <h3>状態の復元</h3>
-          <p>現在の状態、話題、呼ばれ方、眠気、文脈の重さ、自己像をイベントから復元します。</p>
+          <span class="num">現在地</span>
+          <h3>今の状態を組み立てる</h3>
+          <p>話題、呼ばれ方、眠気、文脈の重さ、自己像などを、出来事の記録から組み立てます。</p>
         </article>
         <article class="pillar">
           <span class="num">ツール</span>
-          <h3>結果の着地</h3>
-          <p>検索、記憶参照、ワーカー委任などの結果を、次の判断材料として場へ戻します。</p>
+          <h3>外の力を借りる</h3>
+          <p>検索、記憶の確認、ワーカーへの依頼などを行い、その結果を場へ戻します。</p>
         </article>
       </div>
 
       <h2 id="loop">認知ループ</h2>
-      <p>中心にあるのは、知覚、Fieldの構築、判断、行動、記録を繰り返す自己ペースのループです。処理の長さが次の観測タイミングを自然に決め、認知ループがひとつの行動を選びます。</p>
+      <p>Somniaの中心では、知覚、場の組み立て、判断、行動、記録を一本のループで繰り返します。ひとつの処理が終わると次の観測へ進むため、考える時間に合わせた自然なペースで動きます。</p>
       <div class="flow">
         <div class="node"><div class="n-name">知覚</div><div class="n-sub">入力を受ける</div></div>
         <div class="arrow">→</div>
@@ -97,55 +97,61 @@
         <div class="arrow">→</div>
         <div class="node"><div class="n-name">記録</div><div class="n-sub">次へ残す</div></div>
       </div>
-      <p>行動には、返答する、待機する、眠る、道具を使う、注目先を切り替える、といった選択肢があります。沈黙や待機も明示的な選択肢として扱われ、必要なときだけ発話や委任が行われます。</p>
+      <p>選べる行動は、返事をする、静かに待つ、眠る、道具を使う、注目する場を変える、振り返りを書く、などです。毎回ひとつを選び、話す必要がないときはそのまま待ちます。</p>
 
       <h2 id="field">場</h2>
-      <p>Fieldは、判断に必要な情報を一時的に集約した構造です。直近の会話、内部信号、関連記憶、ワーカーの進捗、未完了の課題、眠気、記憶量の圧迫などが同じ単位で扱われます。</p>
-      <p>フィールド観測は新着イベントを取り込み、現在の文脈を構築します。複数の入力源をFieldに集めることで、Somniaは一件ごとの反応よりも、現在の文脈全体に対する判断を行います。</p>
-      <div class="note"><b>複数の場</b> Discordでの会話、ワーカーとの連携、内部の自己記録は、それぞれ別の場として扱えます。途中報告も観測された発話として入り、次の判断材料になります。自己は一つのまま、場に応じて想起と表現が変わります。</div>
+      <p>「場」は、今の判断に必要な情報を一時的にまとめたものです。直近の会話、自分の状態、関係する記憶、ワーカーの進み具合、やりかけの用事、眠気、記憶の重さなどが同じ場所に並びます。</p>
+      <p>新しい出来事が届くたびに場を組み立て直し、いま大切な流れを見えるようにします。Somniaは、届いた一件だけでなく、会話や作業の流れ全体を見て行動を決めます。</p>
+      <div class="note"><b>複数の場</b> DiscordやLINEでの会話、ワーカーとの作業、自分の内側の記録は、それぞれ別の場として扱われます。ひとつの自己と記憶を保ちながら、いる場に合わせて思い出すことや話し方が変わります。</div>
 
       <h2 id="memory">記憶と睡眠</h2>
-      <p>記憶は、生の出来事、エピソード、意味記憶、ジャーナル、相手ごとのプロフィールなどに分かれます。必要なときには、過去のエピソードを思い出す、ジャーナルを読む、相手の情報を確認する、ログやファイルを探す、意味的に近い記憶を探す、といった形で明示的に参照されます。</p>
-      <p>スリープでは、一定量たまったイベントをエピソードと意味記憶へ圧縮し、短期コンテキストを短くします。スリープ中には直近の判断、自己像、journal、未完了事項も整理され、次回以降の判断材料になります。</p>
-      <p>長期運用のため、記憶量を一定範囲に保つ仕組みも入っています。参照された足跡、時間による減衰、重要記憶の保護、アーカイブ、忘却ノルマにより、推論時に扱う記憶量を保ちます。アーカイブへ移ったイベントは削除されず、通常の想起対象から外れます。</p>
+      <p>記憶は、生の出来事、まとまったエピソード、そこから得た知識、日記、相手ごとの情報などに分かれます。必要なときには、過去の出来事や日記を読む、相手のことを確かめる、ログやファイルを探す、意味の近い記憶を探す、といった道具を自分で選んで使います。</p>
+      <p>起きている間の出来事は、場ごとの短い要約へ少しずつまとめながら持ち続けます。情報が窓からあふれても切り捨てずに圧縮し、睡眠までの流れを保ちます。</p>
+      <p>眠ると、たまった出来事をエピソードと知識へ整理し、日記、自己像、判断の振り返りも更新します。まだ続いている話や用事は次の覚醒へ持ち越し、終わったものは片づけます。</p>
+      <p>記憶が増えすぎたときは、使われた頻度や重要さを手がかりに残すものを見直します。通常の想起から外れた記録も削除せず、別の保管場所へ移します。</p>
 
-      <h2 id="self">三層の自己</h2>
+      <h2 id="self">自分を支える記録</h2>
       <div class="grid compact-grid">
         <article class="pillar">
           <span class="num">核</span>
-          <h3>変えにくい核</h3>
-          <p>責任、誠実さ、他者尊重など、行動の底に置く長期的な方針です。</p>
+          <h3>変わりにくい中心</h3>
+          <p>責任、誠実さ、他者への敬意など、長く保つ価値観と気質の方向です。</p>
         </article>
         <article class="pillar">
           <span class="num">自己像</span>
-          <h3>更新される自己像</h3>
-          <p>自分の動作理解、呼ばれ方、最近の判断から、Somnia自身の捉え方を更新します。</p>
+          <h3>育っていく自分</h3>
+          <p>経験を振り返りながら、自分をどう捉えるかを、決められた長さの中で書き直します。</p>
+        </article>
+        <article class="pillar">
+          <span class="num">自己理解</span>
+          <h3>自分の動き方を知る</h3>
+          <p>自分がどう動き、どんな道具を使えるかという理解を、実際のしくみに合わせて保ちます。</p>
         </article>
         <article class="pillar">
           <span class="num">日記</span>
-          <h3>連続性の記録</h3>
-          <p>日々の出来事や自己理解を一人称の記録として残し、時間をまたいだ文脈を支えます。</p>
+          <h3>時間をまたぐ物語</h3>
+          <p>一人称の日記と、その流れを短くまとめた物語によって、昨日から今日への連続性を支えます。</p>
         </article>
       </div>
 
-      <h2 id="workers">ワーカー連携</h2>
-      <p>調査、実装、レビュー、修正のような重い作業は、ワーカーへ委任されます。委任時には未完了の課題として記録され、中間発話や完了報告は作業連携用の場へ戻ります。</p>
-      <p>Somniaは進捗を観測し、必要に応じて返答し、完了報告で未完了の課題を閉じます。対象が不明な委任は推測で進めず、確認質問を返す設計です。</p>
+      <h2 id="workers">作業の委任</h2>
+      <p>調査、実装、レビュー、修正のような時間のかかる作業は、作業を担当するワーカーへ任せられます。依頼した内容はやりかけの用事として記録され、途中経過や完了報告は専用の場へ戻ります。</p>
+      <p>Somniaはその進み具合を見ながら、必要に応じて追加の返事をし、完了すると用事を閉じます。作業の対象がわからないときは、推測で進めずに確認します。</p>
       <div class="grid compact-grid">
         <article class="pillar">
           <span class="num">コーダー</span>
           <h3>実装</h3>
-          <p>コード変更や調査を伴う作業を任せるワーカーです。</p>
+          <p>コード変更や、そのための調査を担当します。</p>
         </article>
         <article class="pillar">
           <span class="num">レビュアー</span>
           <h3>確認</h3>
-          <p>変更のリスク、抜け、テスト観点を確認するワーカーです。</p>
+          <p>変更のリスク、見落とし、テストの観点を確認します。</p>
         </article>
         <article class="pillar">
           <span class="num">リサーチャー</span>
           <h3>調査</h3>
-          <p>外部情報や大きな探索を整理し、場へ結果を戻すワーカーです。</p>
+          <p>外部の情報や広い調査を整理し、結果を場へ戻します。</p>
         </article>
       </div>
 
@@ -161,11 +167,11 @@
   <div class="wrap">
     <div class="row">
       <span class="brand"><img src="assets/somnia_face.png" alt="">Somnia</span>
-      <span class="muted">A research project by <b>TakeOffLab</b>.</span>
+      <span class="muted"><b>TakeOffLab</b>が開発する研究プロジェクト</span>
       <span class="social">
-        <a href="index.html#top">Main</a>
-        <a href="concept.html">Concept</a>
-        <a href="contact.html">Contact</a>
+        <a href="index.html#top">ホーム</a>
+        <a href="concept.html">理念</a>
+        <a href="contact.html">問い合わせ</a>
         <a href="https://x.com/SomniaAI" target="_blank" rel="noopener">X</a>
       </span>
     </div>

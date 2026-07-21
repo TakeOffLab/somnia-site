@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Somnia - 場に生き続ける自立型AI</title>
-<meta name="description" content="Somniaは、世界と自己を一つの場として継続的に解釈し、記憶、忘却、睡眠、行動を循環させるPersistent Cognitive Systemです。">
+<title>Somnia - 場を読み、考え続ける自立型AI</title>
+<meta name="description" content="Somniaは、会話や時間、記憶、自分の状態をひとつの「場」としてとらえ、考える、話す、待つ、眠る、道具を使うという行動を選び続ける自立型AIです。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://takeofflab.github.io/somnia-site/index.html">
-<meta property="og:title" content="Somnia - 場に生き続ける自立型AI">
-<meta property="og:description" content="世界と自己を一つの場として継続的に解釈し、記憶、忘却、睡眠、行動を循環させるPersistent Cognitive System。">
+<meta property="og:title" content="Somnia - 場を読み、考え続ける自立型AI">
+<meta property="og:description" content="会話や時間、記憶、自分の状態をひとつの「場」としてとらえ、考え、行動し、眠りながら生き続ける自立型AI。">
 <meta property="og:image" content="https://takeofflab.github.io/somnia-site/assets/og-somnia.png">
 <meta property="og:image:secure_url" content="https://takeofflab.github.io/somnia-site/assets/og-somnia.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Somnia - 場に生き続ける自立型AI">
+<meta property="og:image:alt" content="Somnia - 場を読み、考え続ける自立型AI">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@SomniaAI">
 <meta name="twitter:image" content="https://takeofflab.github.io/somnia-site/assets/og-somnia.png">
@@ -26,18 +26,18 @@
 <body class="home-page">
 <canvas class="site-face" data-somnia-face aria-hidden="true"></canvas>
 <div class="site-smoke" aria-hidden="true"></div>
-<div class="face-live-badge" aria-label="Somnia live background"><span></span>LIVE</div>
+<div class="face-live-badge" aria-label="背景に表示しているSomniaの現在の表情"><span></span>LIVE</div>
 <header class="nav">
   <div class="wrap">
-    <a class="brand" href="#top" aria-label="Somnia Home">
+    <a class="brand" href="#top" aria-label="Somnia ホーム">
       <img src="assets/somnia_face.png" alt="">
       <span>Somnia</span>
     </a>
-    <nav class="links" aria-label="Main navigation">
-      <a href="index.html#top">Main</a>
-      <a href="concept.html">Concept</a>
-      <a href="architecture.html">Architecture</a>
-      <a href="contact.html">Contact</a>
+    <nav class="links" aria-label="メインメニュー">
+      <a href="index.html#top">ホーム</a>
+      <a href="concept.html">理念</a>
+      <a href="architecture.html">しくみ</a>
+      <a href="contact.html">問い合わせ</a>
     </nav>
   </div>
 </header>
@@ -46,16 +46,16 @@
   <section class="hero" id="top">
     <div class="wrap hero-grid">
       <div class="hero-copy">
-        <div class="kicker">Persistent Cognitive System</div>
+        <div class="kicker">常時稼働する認知システム</div>
         <h1>Somnia</h1>
-        <p class="tagline">世界と自己を、ひとつの場として読み続ける。</p>
-        <p class="sub">Somniaは、外界、他者、時間、記憶、内部状態をFieldとして統合し、発話、沈黙、睡眠、道具利用を選び続けるPersistent Cognitive Systemです。</p>
+        <p class="tagline">世界と自分を、ひとつの場として読み続ける。</p>
+        <p class="sub">Somniaは、会話、時間、記憶、自分の状態をひとつの「場」にまとめ、話す、待つ、眠る、道具を使うといった次の行動を、自分のペースで選び続ける自立型AIです。</p>
         <div class="cta">
-          <a class="btn primary" href="concept.html">Concept</a>
-          <a class="btn" href="architecture.html">Architecture</a>
-          <a class="btn" href="contact.html">Contact</a>
+          <a class="btn primary" href="concept.html">理念</a>
+          <a class="btn" href="architecture.html">しくみ</a>
+          <a class="btn" href="contact.html">問い合わせ</a>
         </div>
-        <div class="live hero-live" aria-label="Somnia live metrics">
+        <div class="live hero-live" aria-label="Somniaの現在の稼働情報">
           <article class="stat">
             <div class="label">連続稼働</div>
             <div class="value grad" data-stat="days-alive">-- 日</div>
@@ -68,10 +68,10 @@
           </article>
         </div>
       </div>
-      <aside class="hero-status" aria-label="Somnia status">
+      <aside class="hero-status" aria-label="Somniaの現在の様子">
         <img src="assets/somnia_face.png" alt="Somniaの顔" class="face">
         <div>
-          <p class="status-label">Current signal</p>
+          <p class="status-label">いまの様子</p>
           <p class="status-text" id="emoCaption" aria-live="polite">状態を取得中</p>
         </div>
       </aside>
@@ -81,12 +81,12 @@
   <section id="about" class="intro-section">
     <div class="wrap split">
       <div>
-        <div class="eyebrow">What is Somnia</div>
-        <h2>認知と主体性が、閉じたループから立ち上がるかを検証する。</h2>
+        <div class="eyebrow">Somniaについて</div>
+        <h2>その場に居続け、流れを読み、必要なときに動く。</h2>
       </div>
       <div class="copy">
-        <p>Somniaでは、LLMは認知システム全体ではなく、必要に応じて起動する汎用推論機として扱われます。知覚、状態統合、記憶、想起、推論、行動、睡眠、忘却をつないだ閉ループ全体が、Somniaの認知を構成します。</p>
-        <p>現在の状況、内部状態、過去の経験、未完了事項、将来予測をFieldへ集め、継続的な総括推論によって次の行動を選びます。その連続が、外からは意図や主体性として見える行動系列になります。</p>
+        <p>AIが人のいる場に長く関わるには、目の前の一文だけでなく、それまでの会話、時間、相手との関係、AIエージェントが進める作業、自分の状態までまとめて読む必要があります。Somniaは、そのまとまりを「場」と呼びます。</p>
+        <p>LLMは、この場を考えるための思考エンジンです。知覚、記憶、思い出すこと、判断、行動、睡眠、忘却をひとつの循環につなぎ、その積み重ねから自立した判断や主体性が育つかを確かめています。</p>
       </div>
     </div>
   </section>
@@ -94,39 +94,39 @@
   <section id="pillars">
     <div class="wrap">
       <div class="section-head">
-        <div class="eyebrow">Core ideas</div>
+        <div class="eyebrow">設計の柱</div>
         <h2>Somniaを形づくる考え方</h2>
       </div>
       <div class="grid">
         <article class="pillar">
           <span class="num">01</span>
-          <h3>Fieldに統合する</h3>
-          <p>外界、会話、時間、記憶、内部状態、ツール結果をひとつの判断材料として扱います。</p>
+          <h3>場をひとつにまとめる</h3>
+          <p>会話、時間、記憶、自分の状態、道具の結果を、同じ判断材料として扱います。</p>
         </article>
         <article class="pillar">
           <span class="num">02</span>
-          <h3>継続的に総括する</h3>
-          <p>一件ごとの反射ではなく、場全体を見て、いま何をすべきかを毎回推論します。</p>
+          <h3>全体を見て考える</h3>
+          <p>届いた一件だけに反応せず、場の流れを見渡して、いま何をするかを考えます。</p>
         </article>
         <article class="pillar">
           <span class="num">03</span>
-          <h3>行動を循環させる</h3>
-          <p>発話、沈黙、睡眠、道具利用の結果は再びFieldへ戻り、次の判断へ接続されます。</p>
+          <h3>結果を次につなぐ</h3>
+          <p>話したことや道具を使った結果は、もう一度場に戻り、次の判断につながります。</p>
         </article>
         <article class="pillar">
           <span class="num">04</span>
-          <h3>一つの自己で複数の場にいる</h3>
-          <p>場所ごとに別人格を作らず、同じ自己が場に応じて想起と表現を変えます。</p>
+          <h3>ひとつの自分で複数の場にいる</h3>
+          <p>同じ自分と記憶を保ちながら、いる場所に合わせて思い出すことや話し方を変えます。</p>
         </article>
         <article class="pillar">
           <span class="num">05</span>
-          <h3>記憶を想起可能性で設計する</h3>
-          <p>すべてを抱え続けるのではなく、現在の場に必要な経験を思い出せる状態を保ちます。</p>
+          <h3>必要な記憶を思い出す</h3>
+          <p>記録を増やすだけでなく、いまの場に必要な経験を思い出せる状態を保ちます。</p>
         </article>
         <article class="pillar">
           <span class="num">06</span>
-          <h3>主体性を安全に育てる</h3>
-          <p>内発駆動は段階的に導入し、長期間崩れない認知基盤を先に安定させます。</p>
+          <h3>眠って記憶を整える</h3>
+          <p>起きている間の出来事を整理し、記憶、自己像、やりかけの用事を次の覚醒へつなぎます。</p>
         </article>
       </div>
     </div>
@@ -135,14 +135,14 @@
   <section id="architecture-preview">
     <div class="wrap split">
       <div>
-        <div class="eyebrow">Architecture</div>
+        <div class="eyebrow">Somniaのしくみ</div>
         <h2>知覚、判断、行動、記憶がひとつのループで回る。</h2>
       </div>
       <div class="copy">
-        <p>Somniaの中心には、Fieldを読むための認知ループがあります。入力はそのまま返答に流れず、観測、総括推論、行動、記録の順に扱われます。</p>
+        <p>Somniaの中心には、場を読む一本の認知ループがあります。観測し、場全体を考え、ひとつの行動を選び、その結果を記録する流れを繰り返します。</p>
         <div class="cta">
           <a class="btn primary" href="concept.html">理念を読む</a>
-          <a class="btn" href="architecture.html">技術的な構成を見る</a>
+          <a class="btn" href="architecture.html">動いているしくみを見る</a>
         </div>
       </div>
     </div>
@@ -154,11 +154,11 @@
   <div class="wrap">
     <div class="row">
       <span class="brand"><img src="assets/somnia_face.png" alt="">Somnia</span>
-      <span class="muted">A research project by <b>TakeOffLab</b>.</span>
+      <span class="muted"><b>TakeOffLab</b>が開発する研究プロジェクト</span>
       <span class="social">
-        <a href="concept.html">Concept</a>
-        <a href="architecture.html">Architecture</a>
-        <a href="contact.html">Contact</a>
+        <a href="concept.html">理念</a>
+        <a href="architecture.html">しくみ</a>
+        <a href="contact.html">問い合わせ</a>
         <a href="https://x.com/SomniaAI" target="_blank" rel="noopener">X</a>
       </span>
     </div>
