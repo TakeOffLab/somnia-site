@@ -22,7 +22,7 @@ const MOODS = new Set([
   "weary",
   "happy",
 ]);
-const EFFECTS = new Set(["sparkle", "surprise", "beacon"]);
+const EFFECTS = new Set(["sparkle", "surprise", "beacon", "ack"]);
 const TOP_LEVEL_KEYS = new Set([
   "schema",
   "instance_id",
@@ -373,4 +373,3 @@ export class FaceRelay extends DurableObject<Env> {
     try { socket.close(1011, "websocket error"); } catch { /* already closed */ }
   }
 }
-

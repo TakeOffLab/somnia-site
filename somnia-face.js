@@ -9,6 +9,9 @@
   const STATUS_MAX_AGE_MS = 30 * 60 * 1000;
   const STATUS_FUTURE_TOLERANCE_MS = 5 * 60 * 1000;
   const ASSET_BASE = "assets/face/base/";
+  const GLITCH_BURST_SEC = 0.4;
+  const CRT_DARK_HOLD_OFF = 0.2;
+  const CRT_DARK_HOLD_ON = 0.1;
 
   const statusIsFresh = (data) => {
     const generatedAt = Date.parse(data?.generated_at);
@@ -50,7 +53,7 @@
   const moodGlow = {
     calm: 0,
     content: 0.05,
-    curious: 0.14,
+    curious: 0.20,
     focused: 0.08,
     alert: 0.15,
     anxious: 0.05,
@@ -82,12 +85,14 @@
     listening: "listening",
     speaking: "speaking",
     thinking: "thinking",
+    working: "working",
     using_tool: "thinking",
     delegating: "working",
     monitoring_opencode: "working",
     answering_opencode: "working",
     sleeping: "sleeping",
     waking_up: "waking_up",
+    unwell: "unwell",
     llm_offline: "unwell",
     viewer_disconnected: "unwell",
   };
@@ -194,8 +199,12 @@
       this.blinkUntilT = 0;
       this.blinkDuration = 0.15;
       this.moodBlinkScale = 1;
-      this.lastMood = "calm";
       this.moodChangedT = 0;
+      this.primaryChangedT = 0;
+      this.effectStartedAt = new Map();
+      this.stateInitialized = false;
+      this.crtMode = null;
+      this.crtStartedT = 0;
       this.relaySocket = null;
       this.relayReconnectTimer = null;
       this.relayReconnectDelay = 1000;
@@ -286,7 +295,7 @@
       const normal = this.cloneCanvas(layer);
       normal.alphaBox = layer.alphaBox;
       for (const mood of moods) {
-        const shape = ["focused", "anxious", "weary", "happy"].includes(mood) ? mood : "calm";
+        const shape = ["focused", "anxious", "weary", "happy", "content", "alert"].includes(mood) ? mood : "calm";
         layers[mood] = shape === "calm" ? normal : this.shapeEyeLayer(layer, key, shape);
       }
       return layers;
@@ -353,6 +362,14 @@
         const ew = w * 1.30;
         const eh = h * 1.38;
         ctx.ellipse(ex + ew / 2, ey + eh / 2, ew / 2, eh / 2, 0, 0, Math.PI * 2);
+      } else if (mood === "content") {
+        const ex = le - w * 0.10;
+        const ey = bo - h * 0.22;
+        const ew = w * 1.20;
+        const eh = h * 1.42;
+        ctx.ellipse(ex + ew / 2, ey + eh / 2, ew / 2, eh / 2, 0, 0, Math.PI * 2);
+      } else if (mood === "alert") {
+        ctx.rect(le - pad, te - pad, w + pad * 2, h * 0.12 + pad);
       }
       ctx.closePath();
       ctx.fill();
@@ -373,14 +390,44 @@
 
     setState(next) {
       if (!next) return;
+      const now = (performance.now() - this.startedAt) / 1000;
+      const previous = this.state;
+      const previousEffects = new Set(previous.effects || []);
+      const effects = Array.isArray(next.effects) ? [...new Set(next.effects)] : [];
+      if (next.beacon && !effects.includes("beacon")) effects.push("beacon");
       const state = {
         primary: next.primary || "idle",
         energy: next.energy || "normal",
         mood: next.mood || "calm",
-        effects: Array.isArray(next.effects) ? next.effects : [],
-        beacon: Boolean(next.beacon),
+        effects,
       };
+
+      if (!this.stateInitialized || state.mood !== previous.mood) {
+        this.moodChangedT = now;
+      }
+      const previousPrimary = faceOfPrimary[previous.primary] || "idle";
+      const nextPrimary = faceOfPrimary[state.primary] || "idle";
+      if (!this.stateInitialized || nextPrimary !== previousPrimary) {
+        this.primaryChangedT = now;
+        if (this.stateInitialized && nextPrimary === "sleeping") {
+          this.crtMode = "off";
+          this.crtStartedT = now;
+        } else if (this.stateInitialized && previousPrimary === "sleeping") {
+          this.crtMode = "on";
+          this.crtStartedT = now;
+        }
+      }
+
+      const nextEffects = new Set(effects);
+      for (const effect of nextEffects) {
+        if (!previousEffects.has(effect)) this.effectStartedAt.set(effect, now);
+      }
+      for (const effect of previousEffects) {
+        if (!nextEffects.has(effect)) this.effectStartedAt.delete(effect);
+      }
+
       this.state = state;
+      this.stateInitialized = true;
       const [hold, dur, amp, blink] = moodMotion[state.mood] || moodMotion.calm;
       this.saccade.holdScale = hold;
       this.saccade.durScale = dur;
@@ -553,12 +600,64 @@
       return min + Math.random() * (max - min);
     }
 
-    flashWave(dt) {
+    flashWave(dt, { pulse = 0.18, count = 3, hi = 0.5, lo = -0.15 } = {}) {
       if (dt < 0) return 0;
-      const pulse = 0.18;
-      const total = pulse * 2 * 3;
+      const total = pulse * 2 * count;
       if (dt >= total) return 0;
-      return Math.floor(dt / pulse) % 2 === 0 ? 0.5 : -0.15;
+      return Math.floor(dt / pulse) % 2 === 0 ? hi : lo;
+    }
+
+    effectAge(effect, tRaw) {
+      const startedAt = this.effectStartedAt.get(effect);
+      return Number.isFinite(startedAt) ? tRaw - startedAt : Infinity;
+    }
+
+    snapWave(value) {
+      const wave = Math.sin(value);
+      return wave > 0.6 ? 1 : (wave < -0.6 ? -1 : 0);
+    }
+
+    winkSquash(tRaw) {
+      const dt = this.effectAge("ack", tRaw);
+      if (dt < 0 || dt >= this.blinkDuration) return 1;
+      const progress = dt / this.blinkDuration;
+      return progress < 0.5
+        ? 1 - (progress / 0.5) * 0.9
+        : 0.1 + ((progress - 0.5) / 0.5) * 0.9;
+    }
+
+    crtFrame(tRaw) {
+      if (!this.crtMode) return { active: false, params: null };
+      const dt = tRaw - this.crtStartedT;
+      const d = this.blinkDuration;
+      let params;
+
+      if (this.crtMode === "off") {
+        if (dt < d) {
+          const u = dt / d;
+          params = { sy: 1 - u * 0.95, sx: 1, gain: u * 0.9 };
+        } else if (dt < d * 2) {
+          const u = (dt - d) / d;
+          params = { sy: 0.05, sx: 1 - u * 0.92, gain: 0.9 - u * 0.5 };
+        } else if (dt < d * 2 + CRT_DARK_HOLD_OFF) {
+          params = null;
+        } else {
+          this.crtMode = null;
+          return { active: false, params: null };
+        }
+      } else if (dt < CRT_DARK_HOLD_ON) {
+        params = null;
+      } else if (dt - CRT_DARK_HOLD_ON < d) {
+        const u = (dt - CRT_DARK_HOLD_ON) / d;
+        params = { sy: 0.05, sx: 0.08 + u * 0.92, gain: 0.9 - u * 0.3 };
+      } else if (dt - CRT_DARK_HOLD_ON < d * 2) {
+        const u = (dt - CRT_DARK_HOLD_ON - d) / d;
+        params = { sy: 0.05 + u * 0.95, sx: 1, gain: 0.6 - u * 0.6 };
+      } else {
+        this.crtMode = null;
+        return { active: false, params: null };
+      }
+      return { active: true, params };
     }
 
     draw(tRaw) {
@@ -574,6 +673,15 @@
       ctx.clearRect(0, 0, w, h);
       this.drawCoverImage(this.images.base, faceRect);
 
+      const crt = this.crtFrame(tRaw);
+      if (crt.active) {
+        if (crt.params) {
+          this.drawEye("leftEye", 0, 0, crt.params.sy, crt.params.sx, 1 + crt.params.gain, faceRect);
+          this.drawEye("rightEye", 0, 0, crt.params.sy, crt.params.sx, 1 + crt.params.gain, faceRect);
+        }
+        return;
+      }
+
       if (primary === "sleeping") {
         this.drawSleeping(t, faceRect);
         return;
@@ -588,45 +696,79 @@
       const range = stateRange[primary] || 1;
       let dx = motion.x * range * (faceRect.w / 1920);
       let dy = motion.y * range * (faceRect.h / 1080);
-      let glow = 0.74 + motion.pop * 0.28 + (moodGlow[this.state.mood] || 0);
+      const breath = Math.sin(t * 1.2) * 0.15;
+      const micro = Math.sin(t * 0.37 + 0.7) * 0.05;
+      let glow = 1 + breath + micro + motion.pop * 0.25 + (moodGlow[this.state.mood] || 0);
       let squash = this.blinkSquash(t, primary);
       let scale = 1;
+      const unitX = faceRect.w / 1920;
+      const unitY = faceRect.h / 1080;
 
       if (primary === "listening") {
-        glow += 0.12 + 0.06 * Math.sin(t * 5);
-        scale = 1.01;
+        dy -= 3 * unitY;
+        glow += 0.08;
       } else if (primary === "thinking") {
-        dy -= 4 * (faceRect.h / 1080);
-        squash = Math.min(squash, 0.78);
+        dx += 8 * unitX;
+        dy -= 9 * unitY;
       } else if (primary === "speaking") {
-        dx *= 0.35;
-        dy *= 0.35;
-        glow += 0.08 * Math.sin(t * 12);
+        glow += Math.floor(t * 5) % 2 ? 0.25 : 0;
       } else if (primary === "working") {
-        glow += 0.12;
+        dx += this.snapWave(t * 1.7) * 14 * unitX;
+        glow += 0.06;
       } else if (primary === "waking_up") {
-        const open = Math.min(1, t / 1.2);
-        squash = Math.min(squash, 0.15 + 0.85 * open);
-        glow *= open;
+        const phase = Math.min(1, Math.max(0, tRaw - this.primaryChangedT) * 0.25);
+        const step = Math.floor(phase * 5) / 5;
+        squash = Math.min(squash, Math.max(0.22, step));
+        glow -= 0.05;
       } else if (primary === "unwell") {
-        squash = Math.min(squash, 0.35);
-        glow -= 0.26;
+        dx *= 0.2;
+        dy = dy * 0.2 + 8 * unitY;
+        glow = 0.45;
+        squash = Math.min(squash, 0.9);
       }
 
-      if (this.state.mood !== this.lastMood) {
-        this.lastMood = this.state.mood;
-        this.moodChangedT = t;
+      if (["listening", "thinking", "speaking", "working"].includes(primary)) {
+        glow += 0.12;
       }
-      if (this.state.mood === "happy") glow += this.flashWave(t - this.moodChangedT);
-      if (this.state.effects?.includes("beacon") || this.state.beacon) {
-        glow += 0.18 + Math.max(0, Math.sin(t * Math.PI * 2)) * 0.14;
+
+      if (this.state.mood === "happy") {
+        dy -= 4 * unitY;
+        glow += this.flashWave(tRaw - this.moodChangedT);
+      } else if (this.state.mood === "curious") {
+        glow += this.flashWave(tRaw - this.moodChangedT, { pulse: 0.15, count: 1, hi: 0.45 });
       }
+
       if (this.state.effects?.includes("sparkle")) {
-        glow += 0.18 * Math.max(0, Math.sin(t * 18));
+        const sparkle = this.flashWave(this.effectAge("sparkle", tRaw));
+        glow += sparkle || 0.15;
+      }
+      if (this.state.effects?.includes("beacon")) {
+        glow += Math.floor(tRaw / 0.5) % 2 === 0 ? 0.35 : -0.25;
       }
 
-      this.drawEye("leftEye", dx, dy, Math.max(0.06, squash), scale, glow, faceRect);
-      this.drawEye("rightEye", dx, dy, Math.max(0.06, squash), scale, glow, faceRect);
+      const surpriseAge = this.effectAge("surprise", tRaw);
+      if (this.state.effects?.includes("surprise")) {
+        if (surpriseAge < 1.2) {
+          dx *= 0.15;
+          dy *= 0.15;
+        }
+        const surprise = this.flashWave(surpriseAge, { pulse: 0.14, count: 2, hi: 0.6 });
+        glow += surprise || 0.08;
+      }
+
+      const leftSquash = Math.max(0.05, squash);
+      const rightSquash = Math.max(0.05, Math.min(squash, this.winkSquash(tRaw)));
+      const minSquash = Math.min(leftSquash, rightSquash);
+      const eyeGlow = minSquash < 0.95
+        ? glow * Math.max(0.4, 0.4 + 0.6 * minSquash)
+        : glow;
+      const glitchPhase = surpriseAge >= 0 && surpriseAge < GLITCH_BURST_SEC
+        ? Math.floor(tRaw * 30)
+        : null;
+
+      this.drawEye("leftEye", dx, dy, leftSquash, scale, eyeGlow, faceRect, { glitchPhase });
+      this.drawEye("rightEye", dx, dy, rightSquash, scale, eyeGlow, faceRect, { glitchPhase });
+      this.drawStateEffects(primary, tRaw, dx, dy, faceRect);
     }
 
     coverRect(img, w, h) {
@@ -660,8 +802,7 @@
       return this.moodEyeLayers[key]?.[mood] || this.moodEyeLayers[key]?.calm || this.eyeLayers[key] || this.images[key];
     }
 
-    drawEye(key, dx, dy, squash, scale, glow, faceRect) {
-      const ctx = this.ctx;
+    eyeGeometry(key, dx, dy, squash, scale, faceRect) {
       const img = this.eyeLayerFor(key);
       const p = this.eyePlacement(key, faceRect);
       const cx = p.x + p.w / 2 + dx;
@@ -670,6 +811,63 @@
       const dh = p.h * squash;
       const x = cx - dw / 2;
       const y = cy - dh / 2;
+      const box = img.alphaBox || { x: 0, y: 0, w: img.width, h: img.height };
+      const content = {
+        x: x + (box.x / img.width) * dw,
+        y: y + (box.y / img.height) * dh,
+        w: (box.w / img.width) * dw,
+        h: (box.h / img.height) * dh,
+      };
+      return { img, x, y, dw, dh, content };
+    }
+
+    drawGlitchedEye(geometry, phase, glow) {
+      const { img, x, y, dw, dh } = geometry;
+      const ctx = this.ctx;
+      const ghostShift = Math.max(3, this.canvas.width * 0.005);
+
+      for (const [shift, hue] of [[-ghostShift, 115], [ghostShift, -35]]) {
+        ctx.save();
+        ctx.globalCompositeOperation = "lighter";
+        ctx.globalAlpha = 0.28;
+        ctx.filter = `hue-rotate(${hue}deg) brightness(${1.1 + glow * 0.08})`;
+        ctx.drawImage(img, x + shift, y, dw, dh);
+        ctx.restore();
+      }
+
+      const sourceW = img.width;
+      const sourceH = img.height;
+      const bands = 12;
+      for (let band = 0; band < bands; band += 1) {
+        const sourceY = Math.floor(sourceH * band / bands);
+        const nextSourceY = Math.floor(sourceH * (band + 1) / bands);
+        const sourceBandH = Math.max(1, nextSourceY - sourceY);
+        const destinationY = y + dh * band / bands;
+        const destinationBandH = dh / bands + 1;
+        const noise = Math.sin((phase + 1) * (band + 3) * 12.9898);
+        const shift = noise * Math.max(4, this.canvas.width * 0.008);
+        ctx.save();
+        ctx.globalAlpha = 0.94;
+        ctx.filter = `brightness(${Math.max(0.7, 1.02 + glow * 0.12)})`;
+        ctx.drawImage(
+          img,
+          0,
+          sourceY,
+          sourceW,
+          sourceBandH,
+          x + shift,
+          destinationY,
+          dw,
+          destinationBandH,
+        );
+        ctx.restore();
+      }
+    }
+
+    drawEye(key, dx, dy, squash, scale, glow, faceRect, { glitchPhase = null } = {}) {
+      const ctx = this.ctx;
+      const geometry = this.eyeGeometry(key, dx, dy, squash, scale, faceRect);
+      const { img, x, y, dw, dh } = geometry;
 
       ctx.save();
       ctx.globalCompositeOperation = "lighter";
@@ -678,11 +876,62 @@
       ctx.drawImage(img, x, y, dw, dh);
       ctx.restore();
 
-      ctx.save();
-      ctx.globalAlpha = 0.94;
-      ctx.filter = `brightness(${Math.max(0.7, 1.02 + glow * 0.12)})`;
-      ctx.drawImage(img, x, y, dw, dh);
-      ctx.restore();
+      if (glitchPhase === null) {
+        ctx.save();
+        ctx.globalAlpha = 0.94;
+        ctx.filter = `brightness(${Math.max(0.7, 1.02 + glow * 0.12)})`;
+        ctx.drawImage(img, x, y, dw, dh);
+        ctx.restore();
+      } else {
+        this.drawGlitchedEye(geometry, glitchPhase, glow);
+      }
+    }
+
+    drawStateEffects(primary, tRaw, dx, dy, faceRect) {
+      if (primary !== "thinking" && primary !== "working") return;
+      const ctx = this.ctx;
+      for (const key of ["leftEye", "rightEye"]) {
+        const { content } = this.eyeGeometry(key, dx, dy, 1, 1, faceRect);
+        const color = key === "leftEye" ? "84,212,230" : "183,164,255";
+
+        if (primary === "thinking") {
+          const margin = content.h / 8;
+          const progress = (tRaw * 7 % 12) / 12;
+          const y = content.y - margin + (content.h + margin * 2) * progress;
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(content.x, content.y, content.w, content.h);
+          ctx.clip();
+          ctx.globalCompositeOperation = "lighter";
+          ctx.fillStyle = `rgba(${color},.16)`;
+          ctx.shadowColor = `rgba(${color},.34)`;
+          ctx.shadowBlur = Math.max(2, content.h * 0.04);
+          ctx.fillRect(content.x, y, content.w, Math.max(2, content.h / 18));
+          ctx.restore();
+        } else {
+          const pad = content.w * 0.10;
+          const angle = tRaw * Math.PI * 1.8;
+          ctx.save();
+          ctx.globalCompositeOperation = "lighter";
+          ctx.strokeStyle = `rgba(${color},.72)`;
+          ctx.lineWidth = Math.max(2, content.w * 0.025);
+          ctx.lineCap = "round";
+          ctx.shadowColor = `rgba(${color},.46)`;
+          ctx.shadowBlur = Math.max(3, content.w * 0.03);
+          ctx.beginPath();
+          ctx.ellipse(
+            content.x + content.w / 2,
+            content.y + content.h / 2,
+            content.w / 2 + pad,
+            content.h / 2 + pad,
+            0,
+            angle,
+            angle + Math.PI * 0.44,
+          );
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
     }
 
     drawSleeping(t, faceRect) {

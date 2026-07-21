@@ -15,7 +15,7 @@ function payload(overrides: Record<string, unknown> = {}) {
       primary: "working",
       energy: "normal",
       mood: "focused",
-      effects: [],
+      effects: [] as string[],
     },
     ...overrides,
   };
@@ -100,6 +100,22 @@ describe("Somnia face relay", () => {
     const body = payload();
     body.state = { ...body.state, primary: "monitoring_opencode" };
     expect((await publish(body)).status).toBe(400);
+  });
+
+  it("accepts semantic ack but rejects renderer-specific effects", async () => {
+    const ack = payload();
+    ack.state = { ...ack.state, effects: ["ack"] };
+    expect((await publish(ack)).status).toBe(202);
+
+    const rendererEffect = payload({ sequence: 2 });
+    rendererEffect.state = { ...rendererEffect.state, effects: ["ring"] };
+    expect((await publish(rendererEffect)).status).toBe(400);
+
+    const response = await SELF.fetch("https://relay.test/v1/state", {
+      headers: { Origin: ORIGIN },
+    });
+    const body = await response.json<{ state: { effects: string[] } }>();
+    expect(body.state.effects).toEqual(["ack"]);
   });
 
   it("rejects disallowed browser origins", async () => {
