@@ -1,0 +1,36 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "somnia-face-relay",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-21",
+  "workers_dev": true,
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "FACE_RELAY",
+        "class_name": "FaceRelay"
+      }
+    ]
+  },
+  "exports": {
+    "FaceRelay": {
+      "type": "durable-object",
+      "storage": "sqlite"
+    }
+  },
+  "vars": {
+    "ALLOWED_INSTANCES": "somnia",
+    "ALLOWED_ORIGINS": "https://takeofflab.github.io,http://localhost:4173,http://127.0.0.1:4173",
+    "DEFAULT_INSTANCE": "somnia",
+    "LIVE_TTL_MS": "30000",
+    "MAX_PUBLISH_AGE_MS": "300000",
+    "MAX_FUTURE_SKEW_MS": "300000"
+  },
+  "secrets": {
+    "required": ["PUBLISH_TOKEN"]
+  },
+  "observability": {
+    "enabled": true
+  }
+}
+

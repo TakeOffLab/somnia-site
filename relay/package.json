@@ -1,0 +1,21 @@
+{
+  "name": "somnia-face-relay",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "tsc --noEmit",
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "test": "cross-env PUBLISH_TOKEN=test-publish-token vitest run",
+    "test:watch": "cross-env PUBLISH_TOKEN=test-publish-token vitest"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "0.18.6",
+    "@cloudflare/workers-types": "5.20260714.1",
+    "cross-env": "10.1.0",
+    "typescript": "7.0.2",
+    "vitest": "4.1.10",
+    "wrangler": "4.112.0"
+  }
+}

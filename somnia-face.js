@@ -1,6 +1,10 @@
 (() => {
   const FACE_DEBUG = new URLSearchParams(window.location.search).has("face-debug");
   if (FACE_DEBUG) window.somniaFaceScriptLoaded = true;
+  const RELAY_BASE = "https://somnia-face-relay.somnia-ai.workers.dev";
+  const RELAY_STATE_API = `${RELAY_BASE}/v1/state`;
+  const RELAY_STREAM = RELAY_BASE.replace("https://", "wss://") + "/v1/stream";
+  const RELAY_STALE_MS = 35 * 1000;
   const STATUS_API = "https://raw.githubusercontent.com/TakeOffLab/somnia-site/status/status.json";
   const STATUS_MAX_AGE_MS = 30 * 60 * 1000;
   const STATUS_FUTURE_TOLERANCE_MS = 5 * 60 * 1000;
@@ -192,6 +196,13 @@
       this.moodBlinkScale = 1;
       this.lastMood = "calm";
       this.moodChangedT = 0;
+      this.relaySocket = null;
+      this.relayReconnectTimer = null;
+      this.relayReconnectDelay = 1000;
+      this.relayLastLiveAt = 0;
+      this.relayLive = false;
+      this.fallbackRefresh = null;
+      this.lastFallbackAt = 0;
       this.resizeObserver = new ResizeObserver(() => this.resize());
       this.resizeObserver.observe(canvas);
     }
@@ -388,8 +399,10 @@
         this.setState(debugState);
         setLiveBadge(false, "PREVIEW");
       } else {
-        this.refresh();
-        setInterval(() => this.refresh(), 5 * 60 * 1000);
+        this.refreshRelay();
+        this.connectRelay();
+        setInterval(() => this.refreshRelay(), 15 * 1000);
+        setInterval(() => this.checkRelayStaleness(), 5 * 1000);
       }
     }
 
@@ -406,18 +419,104 @@
       };
     }
 
-    async refresh() {
-      try {
-        const response = await fetch(STATUS_API, { cache: "no-store" });
-        if (!response.ok) throw new Error("status unavailable");
-        const data = await response.json();
-        if (!statusIsFresh(data)) throw new Error("status stale");
-        this.setState(data.face);
-        setLiveBadge(true);
-      } catch (_e) {
-        this.setState({ primary: "viewer_disconnected", energy: "drowsy", mood: "weary" });
-        setLiveBadge(false);
+    applyRelayState(data) {
+      if (
+        data?.type !== "state"
+        || data?.schema !== "somnia.face-state.v1"
+        || data.live !== true
+        || !data.state
+      ) {
+        this.markRelayStale(true);
+        return false;
       }
+
+      this.relayLastLiveAt = Date.now();
+      this.relayLive = true;
+      this.setState(data.state);
+      setLiveBadge(true);
+      return true;
+    }
+
+    async refreshRelay() {
+      try {
+        const response = await fetch(RELAY_STATE_API, { cache: "no-store" });
+        if (!response.ok) throw new Error("relay unavailable");
+        const data = await response.json();
+        this.applyRelayState(data);
+      } catch (_e) {
+        this.markRelayStale(false);
+      }
+    }
+
+    connectRelay() {
+      if (this.relaySocket?.readyState === WebSocket.OPEN || this.relaySocket?.readyState === WebSocket.CONNECTING) return;
+
+      try {
+        const socket = new WebSocket(RELAY_STREAM);
+        this.relaySocket = socket;
+        socket.addEventListener("open", () => {
+          this.relayReconnectDelay = 1000;
+        });
+        socket.addEventListener("message", (event) => {
+          try {
+            this.applyRelayState(JSON.parse(event.data));
+          } catch (_e) {
+            // Ignore malformed public messages and let the freshness watchdog handle it.
+          }
+        });
+        socket.addEventListener("close", () => {
+          if (this.relaySocket === socket) this.relaySocket = null;
+          this.markRelayStale(false);
+          this.scheduleRelayReconnect();
+        });
+        socket.addEventListener("error", () => socket.close());
+      } catch (_e) {
+        this.scheduleRelayReconnect();
+      }
+    }
+
+    scheduleRelayReconnect() {
+      if (this.relayReconnectTimer) return;
+      const delay = this.relayReconnectDelay + Math.random() * 500;
+      this.relayReconnectDelay = Math.min(this.relayReconnectDelay * 2, 30 * 1000);
+      this.relayReconnectTimer = setTimeout(() => {
+        this.relayReconnectTimer = null;
+        this.connectRelay();
+      }, delay);
+    }
+
+    checkRelayStaleness() {
+      this.markRelayStale(false);
+    }
+
+    markRelayStale(force) {
+      if (!force && this.relayLastLiveAt && Date.now() - this.relayLastLiveAt <= RELAY_STALE_MS) return;
+      if (!this.relayLive && this.fallbackRefresh) return;
+      if (!this.relayLive && Date.now() - this.lastFallbackAt < 60 * 1000) return;
+      this.relayLive = false;
+      setLiveBadge(false);
+      this.refreshFallback();
+    }
+
+    async refreshFallback() {
+      if (this.fallbackRefresh) return this.fallbackRefresh;
+      this.lastFallbackAt = Date.now();
+      this.fallbackRefresh = (async () => {
+        try {
+          const response = await fetch(STATUS_API, { cache: "no-store" });
+          if (!response.ok) throw new Error("status unavailable");
+          const data = await response.json();
+          if (!statusIsFresh(data)) throw new Error("status stale");
+          if (!this.relayLive) this.setState(data.face);
+        } catch (_e) {
+          if (!this.relayLive) {
+            this.setState({ primary: "viewer_disconnected", energy: "drowsy", mood: "weary" });
+          }
+        } finally {
+          this.fallbackRefresh = null;
+        }
+      })();
+      return this.fallbackRefresh;
     }
 
     faceState() {
