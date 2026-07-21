@@ -2,7 +2,28 @@
   const FACE_DEBUG = new URLSearchParams(window.location.search).has("face-debug");
   if (FACE_DEBUG) window.somniaFaceScriptLoaded = true;
   const STATUS_API = "https://raw.githubusercontent.com/TakeOffLab/somnia-site/status/status.json";
+  const STATUS_MAX_AGE_MS = 30 * 60 * 1000;
+  const STATUS_FUTURE_TOLERANCE_MS = 5 * 60 * 1000;
   const ASSET_BASE = "assets/face/base/";
+
+  const statusIsFresh = (data) => {
+    const generatedAt = Date.parse(data?.generated_at);
+    if (!Number.isFinite(generatedAt)) return false;
+    const age = Date.now() - generatedAt;
+    return age >= -STATUS_FUTURE_TOLERANCE_MS && age <= STATUS_MAX_AGE_MS;
+  };
+
+  const setLiveBadge = (isLive, label = isLive ? "LIVE" : "更新待ち") => {
+    const badge = document.querySelector(".face-live-badge");
+    if (!badge) return;
+    badge.classList.toggle("is-stale", !isLive);
+    badge.setAttribute(
+      "aria-label",
+      isLive ? "背景に表示しているSomniaの現在の表情" : "SomniaのLIVE状態を更新できません",
+    );
+    const textNode = [...badge.childNodes].find((node) => node.nodeType === Node.TEXT_NODE);
+    if (textNode) textNode.nodeValue = label;
+  };
 
   const speedByEnergy = {
     fresh: 1.4,
@@ -365,6 +386,7 @@
       const debugState = this.debugStateFromLocation();
       if (debugState) {
         this.setState(debugState);
+        setLiveBadge(false, "PREVIEW");
       } else {
         this.refresh();
         setInterval(() => this.refresh(), 5 * 60 * 1000);
@@ -389,9 +411,12 @@
         const response = await fetch(STATUS_API, { cache: "no-store" });
         if (!response.ok) throw new Error("status unavailable");
         const data = await response.json();
+        if (!statusIsFresh(data)) throw new Error("status stale");
         this.setState(data.face);
+        setLiveBadge(true);
       } catch (_e) {
         this.setState({ primary: "viewer_disconnected", energy: "drowsy", mood: "weary" });
+        setLiveBadge(false);
       }
     }
 

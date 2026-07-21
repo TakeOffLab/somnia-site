@@ -21,12 +21,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20260617-2">
+<link rel="stylesheet" href="styles.css?v=20260721-1">
 </head>
 <body class="home-page">
 <canvas class="site-face" data-somnia-face aria-hidden="true"></canvas>
 <div class="site-smoke" aria-hidden="true"></div>
-<div class="face-live-badge" aria-label="背景に表示しているSomniaの現在の表情"><span></span>LIVE</div>
+<div class="face-live-badge is-stale" aria-label="SomniaのLIVE状態を確認中"><span></span>確認中</div>
 <header class="nav">
   <div class="wrap">
     <a class="brand" href="#top" aria-label="Somnia ホーム">
@@ -169,6 +169,8 @@
 <script>
 (function () {
   const API = "https://raw.githubusercontent.com/TakeOffLab/somnia-site/status/status.json";
+  const STATUS_MAX_AGE_MS = 30 * 60 * 1000;
+  const STATUS_FUTURE_TOLERANCE_MS = 5 * 60 * 1000;
   const fallback = "--";
   const set = (k, v) => {
     const el = document.querySelector(`[data-stat="${k}"]`);
@@ -197,12 +199,25 @@
       .trim();
     return normalized === "作業を見守っている" ? "作業中" : normalized;
   };
+  const statusIsFresh = (data) => {
+    const generatedAt = Date.parse(data?.generated_at);
+    if (!Number.isFinite(generatedAt)) return false;
+    const age = Date.now() - generatedAt;
+    return age >= -STATUS_FUTURE_TOLERANCE_MS && age <= STATUS_MAX_AGE_MS;
+  };
+  const showUnavailable = () => {
+    set("days-alive", `${fallback} 日`);
+    set("sleep-cycles", fallback);
+    const cap = document.getElementById("emoCaption");
+    if (cap) cap.textContent = "LIVE更新待ち";
+  };
 
   async function refresh() {
     try {
       const r = await fetch(API, { cache: "no-store" });
       if (!r.ok) throw new Error("status unavailable");
       const d = await r.json();
+      if (!statusIsFresh(d)) throw new Error("status stale");
       set("days-alive", `${d.days_alive ?? fallback} 日`);
       const nowDoing = displayStatus(d.now_doing);
       set("sleep-cycles", (d.sleep_cycles ?? fallback).toLocaleString());
@@ -210,8 +225,7 @@
       const cap = document.getElementById("emoCaption");
       if (cap) cap.textContent = nowDoing ? `いまは${nowDoing}` : "静かに観測中";
     } catch (e) {
-      const cap = document.getElementById("emoCaption");
-      if (cap) cap.textContent = "静かに観測中";
+      showUnavailable();
     }
   }
 
@@ -219,7 +233,7 @@
   setInterval(refresh, 5 * 60 * 1000);
 })();
 </script>
-<script src="somnia-face.js?v=20260617-4"></script>
+<script src="somnia-face.js?v=20260721-1"></script>
 <!-- Cloudflare Web Analytics -->
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"0c5d74edb0454869bd92c0ebd1162509"}'></script>
 <!-- End Cloudflare Web Analytics -->

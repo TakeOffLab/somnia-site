@@ -161,6 +161,17 @@ img { max-width: 100%; display: block; }
   box-shadow: 0 0 0 0 rgba(124,207,155,.36), 0 0 12px rgba(124,207,155,.72);
   animation: livePulse 1.8s ease-in-out infinite;
 }
+.face-live-badge.is-stale {
+  color: #9aa3b2;
+  border-color: rgba(154,163,178,.28);
+  background: rgba(13,16,23,.58);
+  box-shadow: none;
+}
+.face-live-badge.is-stale span {
+  background: #7d8796;
+  box-shadow: none;
+  animation: none;
+}
 @keyframes livePulse {
   0%, 100% {
     opacity: .65;
