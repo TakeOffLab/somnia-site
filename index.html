@@ -22,19 +22,19 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css?v=20260721-1">
+<link rel="stylesheet" href="home.css?v=20260722-1">
 </head>
-<body class="home-page">
-<canvas class="site-face" data-somnia-face aria-hidden="true"></canvas>
+<body class="home-page home-redesign">
+<canvas class="site-face" data-somnia-face data-somnia-face-layout="portrait" aria-hidden="true"></canvas>
 <div class="site-smoke" aria-hidden="true"></div>
 <div class="face-live-badge is-stale" aria-label="SomniaのLIVE状態を確認中"><span></span>確認中</div>
-<header class="nav">
-  <div class="wrap">
+<header class="home-nav">
+  <div class="home-nav-inner">
     <a class="brand" href="#top" aria-label="Somnia ホーム">
       <img src="assets/somnia_face.png" alt="">
       <span>Somnia</span>
     </a>
-    <nav class="links" aria-label="メインメニュー">
-      <a href="index.html#top">ホーム</a>
+    <nav class="home-links" aria-label="メインメニュー">
       <a href="concept.html">理念</a>
       <a href="architecture.html">しくみ</a>
       <a href="contact.html">問い合わせ</a>
@@ -43,38 +43,38 @@
 </header>
 
 <main>
-  <section class="hero" id="top">
-    <div class="wrap hero-grid">
-      <div class="hero-copy">
-        <div class="kicker">常時稼働する認知システム</div>
+  <section class="observer-hero" id="top">
+    <div class="observer-wrap">
+      <div class="observer-copy">
+        <p class="observer-kicker"><span aria-hidden="true"></span>常時稼働する認知システム</p>
         <h1>Somnia</h1>
-        <p class="tagline">世界と自分を、ひとつの場として読み続ける。</p>
-        <p class="sub">Somniaは、会話、時間、記憶、自分の状態をひとつの「場」にまとめ、話す、待つ、眠る、道具を使うといった次の行動を、自分のペースで選び続ける自立型AIです。</p>
-        <div class="cta">
-          <a class="btn primary" href="concept.html">理念</a>
-          <a class="btn" href="architecture.html">しくみ</a>
-          <a class="btn" href="contact.html">問い合わせ</a>
-        </div>
-        <div class="live hero-live" aria-label="Somniaの現在の稼働情報">
-          <article class="stat">
-            <div class="label">連続稼働</div>
-            <div class="value grad" data-stat="days-alive">-- 日</div>
-            <div class="hint">リセットせず続いている日数</div>
-          </article>
-          <article class="stat">
-            <div class="label">睡眠回数</div>
-            <div class="value" data-stat="sleep-cycles">--</div>
-            <div class="hint">記憶を整理した回数</div>
-          </article>
+        <p class="observer-tagline">世界と自分を、<br>ひとつの場として読み続ける。</p>
+        <p class="observer-sub">会話、時間、記憶、自分の状態をつなぎ、話す、待つ、眠る、道具を使う。そのとき必要な行動を、自分のペースで選び続ける自立型AIです。</p>
+        <div class="observer-actions">
+          <a class="observer-primary" href="concept.html">理念を読む <span aria-hidden="true">→</span></a>
+          <a class="observer-link" href="architecture.html">しくみを見る <span aria-hidden="true">→</span></a>
         </div>
       </div>
-      <aside class="hero-status" aria-label="Somniaの現在の様子">
-        <img src="assets/somnia_face.png" alt="Somniaの顔" class="face">
-        <div>
-          <p class="status-label">いまの様子</p>
-          <p class="status-text" id="emoCaption" aria-live="polite">状態を取得中</p>
+    </div>
+
+    <div class="telemetry" aria-label="Somniaの現在の稼働情報">
+      <div class="telemetry-inner">
+        <div class="telemetry-item telemetry-status">
+          <span class="telemetry-mark" aria-hidden="true"></span>
+          <div>
+            <span class="telemetry-label">いまのSomnia</span>
+            <strong id="emoCaption" aria-live="polite">状態を取得中</strong>
+          </div>
         </div>
-      </aside>
+        <div class="telemetry-item">
+          <span class="telemetry-label">連続稼働</span>
+          <strong data-stat="days-alive">-- 日</strong>
+        </div>
+        <div class="telemetry-item">
+          <span class="telemetry-label">睡眠</span>
+          <strong><span data-stat="sleep-cycles">--</span> 回</strong>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -223,7 +223,7 @@
       set("sleep-cycles", (d.sleep_cycles ?? fallback).toLocaleString());
 
       const cap = document.getElementById("emoCaption");
-      if (cap) cap.textContent = nowDoing ? `いまは${nowDoing}` : "静かに観測中";
+      if (cap) cap.textContent = nowDoing || "静かに観測中";
     } catch (e) {
       showUnavailable();
     }
@@ -233,7 +233,7 @@
   setInterval(refresh, 5 * 60 * 1000);
 })();
 </script>
-<script src="somnia-face.js?v=20260721-3"></script>
+<script src="somnia-face.js?v=20260722-1"></script>
 <!-- Cloudflare Web Analytics -->
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"0c5d74edb0454869bd92c0ebd1162509"}'></script>
 <!-- End Cloudflare Web Analytics -->

@@ -772,6 +772,18 @@
     }
 
     coverRect(img, w, h) {
+      if (this.canvas.dataset.somniaFaceLayout === "portrait"
+        && this.canvas.getBoundingClientRect().width <= 860) {
+        const scale = (w * 1.36) / img.naturalWidth;
+        const faceWidth = img.naturalWidth * scale;
+        const faceHeight = img.naturalHeight * scale;
+        return {
+          x: (w - faceWidth) / 2,
+          y: h * 0.06,
+          w: faceWidth,
+          h: faceHeight,
+        };
+      }
       const scale = Math.max(w / img.naturalWidth, h / img.naturalHeight);
       return {
         x: (w - img.naturalWidth * scale) / 2,
