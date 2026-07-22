@@ -31,17 +31,6 @@
     linear-gradient(0deg, rgba(9, 12, 14, .72) 0%, rgba(9, 12, 14, .08) 39%, rgba(9, 12, 14, .16) 74%, rgba(9, 12, 14, .54) 100%);
 }
 
-.home-redesign .face-live-badge {
-  z-index: 12;
-  top: 96px;
-  right: max(32px, calc((100vw - 1180px) / 2));
-  border-color: rgba(132, 209, 158, .32);
-  background: rgba(9, 12, 14, .40);
-  color: #e7f7eb;
-  box-shadow: none;
-  letter-spacing: 0;
-}
-
 .home-redesign > .home-nav {
   position: fixed;
   top: 0;
@@ -282,11 +271,6 @@
     background:
       linear-gradient(0deg, rgba(9, 12, 14, .95) 0%, rgba(9, 12, 14, .90) 34%, rgba(9, 12, 14, .28) 58%, rgba(9, 12, 14, .14) 100%),
       linear-gradient(90deg, rgba(9, 12, 14, .36), rgba(9, 12, 14, .14));
-  }
-
-  .home-redesign .face-live-badge {
-    top: 80px;
-    right: 16px;
   }
 
   .home-nav-inner {
