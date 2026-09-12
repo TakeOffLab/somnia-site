@@ -99,7 +99,19 @@ h2 {
   line-height: 1;
 }
 .wordmark-dot {
-  color: var(--purple);
+  color: #a66bfa;
+}
+.wordmark-i {
+  display: inline-block;
+  line-height: 1;
+  background-image: linear-gradient(
+    to bottom,
+    #00cff2 0 30%,
+    currentColor 30% 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 .site-header nav {
   margin-left: auto;

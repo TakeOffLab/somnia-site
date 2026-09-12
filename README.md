@@ -2,6 +2,8 @@
 
 Somniaを知ってもらうための紹介サイト。GitHub Pagesで公開する静的HTML/CSS/JavaScriptです。
 
+ロゴ表記は `Somnia.`。iの点は水色 `#00CFF2`、末尾のピリオドは紫 `#A66BFA` とし、文字の軸は各背景に合わせます。アイコンは全体像イラストの髪形・目・まつ毛に合わせたものを `assets/icon/` に、共有用バナーは `assets/og-somnia-v2.png` に配置しています。
+
 - 公開URL: https://takeofflab.github.io/somnia-site/
 - `index.html`: Somniaの立ち位置、一緒にいる価値、全体像、ライブの顔
 - `concept.html`: 一緒に過ごす時間と関わりの魅力
