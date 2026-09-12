@@ -1,12 +1,49 @@
-# somnia-site
+# Somnia
 
-Somnia の紹介ページ（静的サイト）。GitHub Pages で公開する、**読み物＋顔**主体の紹介用 HP。
+Somniaを知ってもらうための紹介サイト。GitHub Pagesで公開する静的HTML/CSS/JavaScriptです。
 
-- **目的**: サービス提供ではなく「紹介」。YouTube / X など SNS からの到達先。
-- **公開方針**: 会話・記憶の中身は出さない。出すのは「状態と集計」だけ（連続生存日数・いま何をしているか・眠りの回数など）。
-- **構成**: 完全静的（HTML/CSS）。ライブ観察部分は、Somnia 側の公開 read-only API（中身ゼロ）が整い次第、`index.html` 末尾の `API` を設定して有効化する。
-- **配色**: Somnia 自身の viewer 由来（navy ベース × cyan/purple のデュオトーン）。
+- 公開URL: https://takeofflab.github.io/somnia-site/
+- `index.html`: Somniaの立ち位置、一緒にいる価値、全体像、ライブの顔
+- `concept.html`: 一緒に過ごす時間と関わりの魅力
+- `architecture.html`: 仕事を担うAIエージェントと、その力を使うSomniaの役割の違い
+- `contact.html`: Xの連絡先とデザインイメージ
 
-`somnia` 本体（private リポジトリ／エンジン）とは分離。ここには公開して問題ないものだけを置く。
+## 開発
 
-A research project by **TakeOffLab**.
+`python -m http.server 4173 --bind 127.0.0.1` で起動します。公開リレーは既存の許可リストにある `http://127.0.0.1:4173` / `http://localhost:4173` で受信できます。ほかのポートでは顔は更新待ちになります。
+
+ビルドとnpmの依存はありません。`main`への更新で既存のGitHub Pagesが公開します。`relay/`のCloudflare Workerは独立しており、通常のページ編集で変更・再デプロイする必要はありません。
+
+## 顔の同期
+
+`face-state.js` は公開リレーのWebSocketとGETから、`primary / mood / energy / effects`の4項目だけを受信します。語彙・鮮度・順序を検証し、古い状態をLIVEと表示しません。初回の接続失敗も更新待ちへ移り、切断中は最後の顔から一時的なエフェクトを取り除きます。
+
+`face-motion.js` はデスクトップの `src/viewer/expressive_motion.py` を移植した、時間ベースのばね・視線・まばたき・反応のアニメーションです。`face-renderer.js` はWebGL 2で描きます。デスクトップと同じまぶた・まつ毛のシェーダーは `assets/face/expressive/shaders.json` に書き出しています。距離場はPNGへ量子化して配信するため、GPU間の画素値まで一致する保証ではありません。
+
+同期するのは本体の意味的な状態と反応です。細かい瞬き・視線は各画面の時計と乱数で描画するため、映像のフレーム単位での同期ではありません。会話や思考、記憶、作業の中身、認証情報はブラウザへ渡しません。
+
+画面外や非表示タブでは描画を止めます。`prefers-reduced-motion` と停止ボタンに対応し、WebGLが使えない場合も静止画と状態の文章を表示します。
+
+## 検証
+
+- `node checks/verify.mjs`: デスクトップ2,880フレームとの数値比較、公開状態の語彙・鮮度・逆順拒否、切断・復旧。
+- `http://127.0.0.1:4173/checks/face-preview.html`: 8表情、8活動、4段階の調子、4エフェクトの実描画。外部へ状態を送信しないローカルの検証画面です。
+
+`checks/`の比較用JSONは公開された顔のパラメーターだけであり、本体の稼働履歴ではありません。
+
+## 内容の出典
+
+Somnia本体 `8b140b8`（2026-09-13取得）にある以下の文書をもとに、紹介用の文章を構成しました。
+
+- `docs/somnia理念.md`: 場の継続推論、主体性の仮説、今後の構想
+- `README.md` / `docs/current_architecture.md`: 現在の構成と実装の境界
+- `docs/concept.md`: 継続的な存在と記憶・睡眠の構想
+- `docs/identity_soul.md`: 方向性、自己像、記憶、journalとarc
+- `docs/face_publisher.md`: 公開顔状態の配信仕様
+- `image/A4C0F85E-70F5-4F75-8DF0-071F9CFDA0C5.png`: 全体像のデザインイメージ
+
+本文は「使うAIから、一緒にいるAIへ」を中心に、Somniaとは何か、AIや道具を利用する側にいること、次の行動を判断する価値を伝えます。仕組みの解説は表のページから外しています。
+
+30日は価値を伝えるための目標像であり、測定された達成保証ではありません。研究上の目標と動いている機能を区別し、人間と同じ主観的意識が実証されたとは述べていません。
+
+全ページで、デスクトップと同期する顔を背景として表示します。トップの全体像イラストは紹介文に添え、初めの画面では背景の顔とSomniaの立ち位置を主役にしています。

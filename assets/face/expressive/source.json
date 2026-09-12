@@ -1,0 +1,13 @@
+{
+  "desktop_source": {
+    "expressive_motion.py": "b1a3c21bce8af29170e1ad18c7eaf4442e3da6a1c1f86faaee401c3a5ee516f4",
+    "expressive_face.py": "a6b43d5a4f7232a03ad099ba6904b22c15028e4a7ba45f523ddcf72a24a1ff4f",
+    "gpu_face.py": "42822c58800527c5fbf91ad22be474e7c2404dead028e8dea3cd970eca20b7d7",
+    "gpu_effects.py": "2d12a8e4729b13c543068c5a3f70e5a2e180736532300d7a003b8f9f60fd0107"
+  },
+  "reference_size": [
+    960,
+    540
+  ],
+  "distance_encoding": "(signed_distance+24.5)/49 in PNG; reconstructed in GLSL"
+}

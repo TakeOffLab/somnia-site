@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="ja">
+  <meta charset="utf-8" /><meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  /><title>Somnia 顔の検証</title
+  ><link rel="stylesheet" href="../styles.css" /><base href="../" /><style>
+    body {
+      padding: 30px;
+    }
+    main {
+      max-width: 1100px;
+      margin: auto;
+    }
+    .face-stage {
+      max-width: 960px;
+      margin: 25px auto;
+    }
+    button,
+    select {
+      font: inherit;
+      padding: 6px 14px;
+      margin: 4px;
+      border: 1px solid #8796aa;
+      background: white;
+      color: #112035;
+      border-radius: 3px;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    output {
+      display: block;
+      padding: 14px;
+      font-size: 14px;
+    }
+    .sheet {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    .sheet img {
+      width: 100%;
+    }
+    .sheet figcaption {
+      font-size: 13px;
+    }
+  </style>
+  <main>
+    <h1>顔と状態の検証</h1>
+    <div class="controls">
+      <label
+        >気分
+        <select id="mood">
+          <option>calm</option>
+          <option>content</option>
+          <option>curious</option>
+          <option>focused</option>
+          <option>alert</option>
+          <option>anxious</option>
+          <option>weary</option>
+          <option>happy</option>
+        </select></label
+      ><label
+        >活動
+        <select id="primary">
+          <option>idle</option>
+          <option>listening</option>
+          <option>speaking</option>
+          <option>thinking</option>
+          <option>working</option>
+          <option>sleeping</option>
+          <option>waking_up</option>
+          <option>unwell</option>
+        </select></label
+      ><label
+        >調子
+        <select id="energy">
+          <option>normal</option>
+          <option>fresh</option>
+          <option>drowsy</option>
+          <option>exhausted</option>
+        </select></label
+      >
+    </div>
+    <div>
+      <button data-effect="surprise">驚き</button
+      ><button data-effect="sparkle">きらめき</button
+      ><button data-effect="ack">了解</button
+      ><button data-effect="beacon">呼びかけ</button
+      ><button id="clear">通常に戻す</button
+      ><button id="pause">動きを止める</button
+      ><button id="sheet">全表情を並べる</button
+      ><button id="effects-sheet">演出とまばたきを並べる</button
+      ><button id="sync">同期テスト</button>
+    </div>
+    <div class="face-stage">
+      <canvas id="face"></canvas><canvas id="effects"></canvas>
+    </div>
+    <output id="result">起動中</output>
+    <div class="sheet"></div>
+  </main>
+  <script type="module">
+    import { FaceRenderer } from "./face-renderer.js";
+    import { MOODS, ExpressiveMotion } from "./face-motion.js";
+    import { FaceFeed } from "./face-state.js";
+    const face = new FaceRenderer(
+      document.querySelector("#face"),
+      document.querySelector("#effects"),
+    );
+    const out = document.querySelector("#result");
+    await face.init();
+    let state = {
+      primary: "idle",
+      mood: "calm",
+      energy: "normal",
+      effects: [],
+    };
+    const apply = () => face.setState(state);
+    document.querySelectorAll("select").forEach(
+      (s) =>
+        (s.onchange = () => {
+          state[s.id] = s.value;
+          apply();
+        }),
+    );
+    document.querySelectorAll("[data-effect]").forEach(
+      (b) =>
+        (b.onclick = () => {
+          state.effects = [b.dataset.effect];
+          face.motion.effects.clear();
+          apply();
+        }),
+    );
+    document.querySelector("#clear").onclick = () => {
+      state.effects = [];
+      apply();
+    };
+    document.querySelector("#pause").onclick = () => {
+      face.paused = !face.paused;
+      face.resume();
+      document.querySelector("#pause").textContent = face.paused
+        ? "動きを再開する"
+        : "動きを止める";
+    };
+    out.textContent =
+      "WebGL 2 起動済み / " + face.gl.getParameter(face.gl.RENDERER);
+    let frames = 0,
+      start = performance.now();
+    const monitor = () => {
+      frames++;
+      if (performance.now() - start > 3000) {
+        document.querySelector(".face-stage").dataset.fps = (
+          (frames * 1000) /
+          (performance.now() - start)
+        ).toFixed(1);
+        frames = 0;
+        start = performance.now();
+      }
+      requestAnimationFrame(monitor);
+    };
+    monitor();
+    document.querySelector("#sheet").onclick = () => {
+      face.stop();
+      const sheet = document.querySelector(".sheet");
+      sheet.replaceChildren();
+      for (const mood of Object.keys(MOODS)) {
+        const sample = { primary: "idle", energy: "normal", mood, effects: [] };
+        face.motion.last = null;
+        face.motion.sample(sample, 0);
+        face.motion.nextBlink = 10000;
+        face.motion.nextGaze = 10000;
+        face.motion.gaze = [0, 0];
+        face.state = sample;
+        for (let i = 0; i < 130; i++) face.motion.sample(sample, i / 60);
+        face.draw(130 / 60);
+        const fig = document.createElement("figure"),
+          img = new Image(),
+          caption = document.createElement("figcaption");
+        img.src = face.canvas.toDataURL();
+        caption.textContent = mood;
+        fig.append(img, caption);
+        sheet.append(fig);
+      }
+      out.textContent = "8種類の表情を描画しました";
+      face.state = state;
+      face.resume();
+    };
+    document.querySelector("#sync").onclick = () => {
+      face.paused = false;
+      face.resume();
+      const checks = [];
+      const feed = new FaceFeed(
+        (s) => {
+          face.setState(s);
+          checks.push(s.primary);
+        },
+        (live) => {
+          out.textContent = live ? "同期中" : "更新待ち";
+        },
+      );
+      const packet = (s, time = Date.now()) => ({
+        type: "state",
+        schema: "somnia.face-state.v1",
+        live: true,
+        received_at: new Date(time).toISOString(),
+        observed_at: new Date(time).toISOString(),
+        state: s,
+      });
+      feed.accept(
+        packet({
+          primary: "sleeping",
+          mood: "weary",
+          energy: "drowsy",
+          effects: [],
+        }),
+      );
+      setTimeout(() => {
+        feed.expire(true);
+        checks.push(out.textContent);
+        feed.accept(
+          packet({
+            primary: "listening",
+            mood: "curious",
+            energy: "fresh",
+            effects: ["surprise"],
+          }),
+        );
+        checks.push(out.textContent);
+        out.textContent = "検証結果: " + checks.join(" → ");
+        out.dataset.passed = String(
+          checks.join("|") === "sleeping|更新待ち|listening|同期中",
+        );
+      }, 1500);
+    };
+
+    document.querySelector("#effects-sheet").onclick = () => {
+      face.stop();
+      const sheet = document.querySelector(".sheet");
+      sheet.replaceChildren();
+      for (const name of [
+        "surprise",
+        "sparkle",
+        "ack",
+        "beacon",
+        "calm blink",
+        "happy blink",
+      ]) {
+        face.motion = new ExpressiveMotion(() => 0.5);
+        const sample = {
+          primary: "idle",
+          energy: "normal",
+          mood: name.startsWith("happy") ? "happy" : "calm",
+          effects: name.includes("blink") ? [] : [name],
+        };
+        face.state = sample;
+        for (let i = 0; i < 25; i++) face.motion.sample(sample, i / 60);
+        if (name.includes("blink")) {
+          const poses = face.motion
+            .sample(sample, 25 / 60)
+            .map((p) => ({ ...p, openness: 0.04 }));
+          face.motion = { sample: () => poses, effectFrame: () => ({}) };
+        }
+        face.draw(25 / 60);
+        const combined = document.createElement("canvas");
+        combined.width = 960;
+        combined.height = 540;
+        const ctx = combined.getContext("2d");
+        ctx.drawImage(face.canvas, 0, 0);
+        ctx.drawImage(face.overlay, 0, 0);
+        const fig = document.createElement("figure"),
+          img = new Image(),
+          caption = document.createElement("figcaption");
+        img.src = combined.toDataURL();
+        caption.textContent = name;
+        fig.append(img, caption);
+        sheet.append(fig);
+      }
+      out.textContent = "4エフェクト・2種類の閉じたまつ毛を描画しました";
+      face.motion = new ExpressiveMotion();
+      face.state = state;
+      face.resume();
+    };
+  </script>
+</html>
