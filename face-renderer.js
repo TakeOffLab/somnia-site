@@ -78,7 +78,7 @@ export class FaceRenderer {
       { rootMargin: "80px" },
     );
     const surfaces = this.canvas.hasAttribute("data-background-face")
-      ? document.querySelectorAll(".hero, .article-hero, .thought-section")
+      ? document.querySelectorAll("main")
       : [this.canvas];
     for (const surface of surfaces) this.observer.observe(surface);
     document.addEventListener("visibilitychange", () => this.resume());

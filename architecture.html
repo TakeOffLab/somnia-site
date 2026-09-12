@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>AIとの違い — Somnia</title>
+    <title>他のAIとの違い — Somnia</title>
     <meta
       name="description"
       content="Somniaは、AIエージェントや道具を状況に応じて使う側にいるAI。仕事を進める役割と、次に何をするべきかを判断し続ける役割の違いを紹介します。"
@@ -13,7 +13,7 @@
       property="og:url"
       content="https://takeofflab.github.io/somnia-site/architecture.html"
     />
-    <meta property="og:title" content="AIとの違い — Somnia" />
+    <meta property="og:title" content="他のAIとの違い — Somnia" />
     <meta
       property="og:description"
       content="Somniaは、AIエージェントや道具を状況に応じて使う側にいるAI。仕事を進める役割と、次に何をするべきかを判断し続ける役割の違いを紹介します。"
@@ -38,7 +38,7 @@
       href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Serif+JP:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=20260913-2" />
+    <link rel="stylesheet" href="styles.css?v=20260913-3" />
   </head>
   <body class="reading ambient-site">
     <div class="face-stage ambient-face" aria-hidden="true">
@@ -58,7 +58,7 @@
       <nav aria-label="メインメニュー">
         <a href="index.html#about">Somniaとは</a
         ><a href="concept.html">一緒にいる魅力</a
-        ><a href="architecture.html" aria-current="page">AIとの違い</a>
+        ><a href="architecture.html" aria-current="page">他のAIとの違い</a>
       </nav>
       <a class="header-live" href="index.html#now"
         >いまのSomnia <span aria-hidden="true">↗</span></a
@@ -95,7 +95,9 @@
             <p>
               Somniaが中心に置くのは、「次に何をするべきか」という問い。人の意図やその場の流れを受けとめ、何を進めるか、何を任せるか、いつ関わるかを考えます。
             </p>
-            <p>AIエージェントと組み合わせて動く、役割の異なる存在です。</p>
+            <p>
+              SomniaもAIのひとつです。仕事を担うほかのAIと組み合わせながら、次に何をするかを判断する役割を担います。
+            </p>
             <figure
               class="role-map"
               aria-label="あなたと状況を共有するSomniaが、AIエージェントや道具を利用する"
@@ -133,24 +135,51 @@
             <p>
               記憶やツール利用という機能の名前だけでは、Somniaの違いは伝わりません。その力を何のために使い、どの役割を担うかを大切にしています。
             </p>
-            <div class="role-comparison">
-              <div class="comparison-heading">
-                <span>仕事を担うAIエージェント</span
-                ><span>Somniaが目指す役割</span>
-              </div>
-              <div class="comparison-row">
-                <p>任された仕事を、どう進めるか。</p>
-                <p>いま、何をするべきか。</p>
-              </div>
-              <div class="comparison-row">
-                <p>仕事に必要な処理を実行する。</p>
-                <p>必要なAIや道具を選び、結果を次の判断に生かす。</p>
-              </div>
-              <div class="comparison-row">
-                <p>依頼された仕事の結果を届ける。</p>
-                <p>仕事の前後も含めて、人との関わりを続ける。</p>
-              </div>
-            </div>
+            <table class="role-comparison" role="table">
+              <caption>
+                AIの役割を、3つの視点で比べる
+              </caption>
+              <thead role="rowgroup">
+                <tr role="row">
+                  <th scope="col" role="columnheader">比べる視点</th>
+                  <th scope="col" role="columnheader">
+                    仕事を担う<br />AIエージェント
+                  </th>
+                  <th scope="col" role="columnheader">
+                    Somnia<span>目指す役割</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody role="rowgroup">
+                <tr role="row">
+                  <th scope="row" role="rowheader">考えること</th>
+                  <td role="cell" data-label="仕事を担う&#10;AIエージェント">
+                    任された仕事を、どう進めるか。
+                  </td>
+                  <td role="cell" data-label="Somnia">
+                    いま、何をするべきか。
+                  </td>
+                </tr>
+                <tr role="row">
+                  <th scope="row" role="rowheader">力の使い方</th>
+                  <td role="cell" data-label="仕事を担う&#10;AIエージェント">
+                    仕事に必要な処理を実行する。
+                  </td>
+                  <td role="cell" data-label="Somnia">
+                    必要なAIや道具を選び、結果を次の判断に生かす。
+                  </td>
+                </tr>
+                <tr role="row">
+                  <th scope="row" role="rowheader">関わる範囲</th>
+                  <td role="cell" data-label="仕事を担う&#10;AIエージェント">
+                    依頼された仕事の結果を届ける。
+                  </td>
+                  <td role="cell" data-label="Somnia">
+                    仕事の前後も含めて、人との関わりを続ける。
+                  </td>
+                </tr>
+              </tbody>
+            </table>
             <p>
               Somniaは、仕事の実行を担うAIや道具の力を借りながら、状況の理解と継続する判断を受け持ちます。
             </p>
@@ -180,11 +209,13 @@
             </p>
           </div>
         </section>
+      </div>
+      <nav class="reading-next" aria-label="続きのページ">
         <a class="next-reading" href="concept.html"
           ><span>続けて読む</span><strong>一緒にいると、何が変わるか。</strong
           ><span aria-hidden="true">↗</span></a
         >
-      </div>
+      </nav>
     </main>
     <footer class="site-footer">
       <div class="footer-main">
@@ -203,7 +234,7 @@
         ><span>© 2026 TakeOffLab</span>
       </div>
     </footer>
-    <script type="module" src="site.js?v=20260913"></script>
+    <script type="module" src="site.js?v=20260913-3"></script>
     <script
       defer
       src="https://static.cloudflareinsights.com/beacon.min.js"
