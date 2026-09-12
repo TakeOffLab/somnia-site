@@ -521,14 +521,31 @@ details p {
 }
 .closing {
   text-align: center;
-  padding: 40px 24px 108px;
+  padding: 64px 24px 88px;
+  background: var(--night);
+  color: #f6f7f9;
 }
 .closing > p {
   font-family: var(--serif);
   font-size: 22px;
+  text-wrap: balance;
 }
 .closing .text-link {
   margin-top: 12px;
+  color: #ddedff;
+  border-color: #849eb9;
+}
+.closing .closing-note {
+  margin: 20px 0 8px;
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.9;
+  color: #b6c6da;
+}
+.closing .text-link:hover,
+.closing .text-link:focus-visible {
+  color: #fff;
+  border-color: #fff;
 }
 .site-footer {
   background: #edf0f4;
@@ -713,13 +730,6 @@ details p {
 .contact-body > p {
   font-size: 14px;
   color: var(--muted);
-}
-.contact-character {
-  max-width: 640px;
-  margin: 65px auto 0;
-}
-.contact-character img {
-  border-radius: 4px;
 }
 @media (min-width: 1600px) {
   .hero {
@@ -1009,7 +1019,7 @@ details p {
     font-size: 14px;
   }
   .closing {
-    padding: 24px 7% 65px;
+    padding: 44px 7% 55px;
   }
   .closing > p {
     font-size: 18px;
@@ -1091,9 +1101,6 @@ details p {
   }
   .contact-address strong {
     font-size: 32px;
-  }
-  .contact-character {
-    margin-top: 40px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

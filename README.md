@@ -6,7 +6,7 @@ Somniaを知ってもらうための紹介サイト。GitHub Pagesで公開す�
 - `index.html`: Somniaの立ち位置、一緒にいる価値、全体像、ライブの顔
 - `concept.html`: 一緒に過ごす時間と関わりの魅力
 - `architecture.html`: 仕事を担うAIエージェントと、その力を使うSomniaの役割の違い
-- `contact.html`: Xの連絡先とデザインイメージ
+- `contact.html`: 今後Somnia自身が扱う予定のXアカウント（現在は未運用）
 
 ## 開発
 
