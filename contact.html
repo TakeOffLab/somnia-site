@@ -41,10 +41,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css?v=20260913-4" />
-    <style>
-      .contact-address { grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; }
-      .contact-address strong { min-width: 0; overflow-wrap: anywhere; font-size: clamp(19px, 3vw, 32px); }
-    </style>
+    <link rel="stylesheet" href="contact.css?v=20260915-1" />
   </head>
   <body class="reading ambient-site">
     <div class="face-stage ambient-face" aria-hidden="true">
@@ -91,24 +88,65 @@
         </div>
       </div>
       <div class="article-body contact-body">
-        <a
-          class="contact-address"
-          href="mailto:takeofflab2000@gmail.com"
-          ><span>TakeOffLab / メールで相談する</span><strong>takeofflab2000@gmail.com</strong
-          ><span aria-hidden="true">↗</span></a
-        >
-        <p>
-          メールアプリが開かない場合は、上のアドレスをコピーしてご連絡ください。
-        </p>
-        <p>
-          相談内容と、ご希望の連絡先をお知らせください。<br />内容を確認し、担当者よりご連絡します。サービス内容・日程・提供可否は個別に確認します。
-        </p>
-        <p>
-          初回のご連絡には、機密資料や個人情報を含む詳細な資料の添付をお控えください。
-        </p>
-        <p>
-          Xは現在、運用準備中です。ご相談はメールで受け付けています。
-        </p>
+        <div class="contact-layout">
+          <div class="contact-intro">
+            <p class="eyebrow">CONTACT</p>
+            <h2>まずは、お話から。</h2>
+            <p>聞いてみたいこと、<br />一緒に考えたいこと。<br />まだ具体的でなくても、お気軽に。</p>
+            <p class="contact-small">内容を確認し、TakeOffLabの担当者よりメールでご連絡します。サービス内容・日程・提供可否は個別に確認します。</p>
+          </div>
+          <form id="contact-form" class="contact-form" action="https://formspree.io/f/xgaegpjd" method="post" accept-charset="UTF-8" aria-describedby="contact-privacy contact-status">
+            <fieldset>
+              <legend class="contact-sr-only">お問い合わせ内容</legend>
+              <input type="hidden" name="_subject" value="Somniaサイトからのお問い合わせ" />
+              <input type="hidden" name="_language" value="ja" />
+              <div class="contact-honeypot" aria-hidden="true">
+                <label for="contact-extra">この欄は空欄のままにしてください</label>
+                <input id="contact-extra" type="text" name="_gotcha" tabindex="-1" autocomplete="off" />
+              </div>
+              <div class="contact-fields-row">
+                <div class="contact-field">
+                  <label for="contact-name">お名前 <span>必須</span></label>
+                  <input id="contact-name" name="name" type="text" autocomplete="name" maxlength="100" required />
+                </div>
+                <div class="contact-field">
+                  <label for="contact-organization">会社・所属 <span class="optional">任意</span></label>
+                  <input id="contact-organization" name="organization" type="text" autocomplete="organization" maxlength="160" />
+                </div>
+              </div>
+              <div class="contact-field">
+                <label for="contact-email">メールアドレス <span>必須</span></label>
+                <input id="contact-email" name="email" type="email" autocomplete="email" inputmode="email" autocapitalize="none" spellcheck="false" maxlength="254" aria-describedby="contact-email-note" required />
+                <p id="contact-email-note" class="contact-hint">返信を受け取れるアドレスをご入力ください。</p>
+              </div>
+              <div class="contact-field">
+                <label for="contact-topic">ご相談の種類 <span>必須</span></label>
+                <select id="contact-topic" name="topic" required>
+                  <option value="" disabled selected>選択してください</option>
+                  <option>Somniaの研究・共同研究</option>
+                  <option>AI活用・研修</option>
+                  <option>準備中のAPIサービス</option>
+                  <option>取材・その他</option>
+                </select>
+              </div>
+              <div class="contact-field">
+                <label for="contact-message">お問い合わせ内容 <span>必須</span></label>
+                <textarea id="contact-message" name="message" rows="7" maxlength="5000" aria-describedby="contact-message-note" required></textarea>
+                <p id="contact-message-note" class="contact-hint">相談したいことや、ご希望の時期などをお聞かせください。5,000文字以内。</p>
+              </div>
+              <div class="contact-submit-area">
+                <p id="contact-privacy" class="contact-small">入力いただいた情報は、お問い合わせへの対応に使用します。送信には<a href="https://formspree.io/legal/privacy-policy/" target="_blank" rel="noopener noreferrer">Formspree</a>を利用します。</p>
+                <button class="contact-submit" type="submit">お問い合わせを送る <span aria-hidden="true">↗</span></button>
+                <p class="contact-hint">送信後、確認画面へ進みます。</p>
+              </div>
+            </fieldset>
+            <p id="contact-status" class="contact-status" role="status" hidden>現在、フォームを利用できません。時間をおいて再度お試しください。</p>
+          </form>
+        </div>
+        <div class="contact-footnote">
+          <p>初回のご連絡では、機密情報や第三者の個人情報の記載をお控えください。</p>
+          <p>Xは現在、運用準備中です。ご相談はこのフォームから受け付けています。</p>
+        </div>
       </div>
     </main>
     <footer class="site-footer">
@@ -129,6 +167,7 @@
       </div>
     </footer>
     <script type="module" src="site.js?v=20260913-3"></script>
+    <script type="module" src="contact-form.js?v=20260915-2"></script>
     <script
       defer
       src="https://static.cloudflareinsights.com/beacon.min.js"
